@@ -1,5 +1,12 @@
 require("@nomiclabs/hardhat-waffle");
+require('@openzeppelin/hardhat-upgrades');
+require("@nomiclabs/hardhat-etherscan");
 
+const env = require('./.env.json');
+
+PRIV_1 = env.PRIVATE_KEY_1;
+PRIV_2 = env.PRIVATE_KEY_2;
+PRIV_3 = env.PRIVATE_KEY_3;
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
@@ -36,8 +43,13 @@ module.exports = {
         ]
     },
     networks: {
+        mainnet: {
+            url: `https://mainnet.infura.io/v3/${env.INFURA}`,
+            accounts: [`0x${PRIV_1}`, `0x${PRIV_2}`, `0x${PRIV_3}`]
+        },
         mumbai: {
-            url: 'https://matic-mumbai.chainstacklabs.com'
+            url: 'https://matic-mumbai.chainstacklabs.com',
+            accounts: [`0x${PRIV_1}`, `0x${PRIV_2}`, `0x${PRIV_3}`]
         }
     }
 };
