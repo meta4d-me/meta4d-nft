@@ -20,6 +20,7 @@ contract M4mNFTRegistry is OwnableUpgradeable, IM4mNFTRegistry {
     // attrName => tokenId => enabled
     mapping(AttrName => mapping(uint => bool)) public override attrTokenIdEnabled;
 
+    // TODO: init component
     function initialize(IM4mComponents _components, address _m4mNFT) public initializer {
         __Ownable_init_unchained();
 
@@ -28,7 +29,7 @@ contract M4mNFTRegistry is OwnableUpgradeable, IM4mNFTRegistry {
     }
 
     function addComponent(uint tokenId, AttrName attrName, string memory name, string memory symbol,
-        string memory value) public override {
+        string memory value) public override onlyOwner {
         require(!attrTokenIdEnabled[attrName][tokenId], 'existed');
         components.prepareNewToken(tokenId, name, symbol, value);
         _attrTokenIds[attrName].push(tokenId);
