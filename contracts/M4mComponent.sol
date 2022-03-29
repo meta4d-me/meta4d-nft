@@ -4,10 +4,57 @@ pragma solidity =0.8.12;
 import '@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 
-contract M4mComponent is ERC1155Upgradeable, OwnableUpgradeable {
+import './interfaces/IM4mComponents.sol';
 
-    function initialize(string memory uri) public initializer  {
+contract M4mComponent is ERC1155Upgradeable, OwnableUpgradeable, IM4mComponents {
+
+    mapping(uint => string) public override name;
+    mapping(uint => string) public override symbol;
+    mapping(uint => string) public override attrValue;
+    mapping(uint => uint) public override totalSupply;
+
+    IM4mNFTRegistry public override registry;
+
+    function initialize(string memory uri, IM4mNFTRegistry _registry) public initializer {
         __ERC1155_init_unchained(uri);
         __Ownable_init_unchained();
+        registry = _registry;
+    }
+
+    // @notice we can prepare new token many times as long as it's supply is 0
+    function prepareNewToken(uint tokenId, string memory _name, string memory _symbol, string memory _attrValue) public {
+        require(msg.sender == address(registry), 'only registry');
+        require(totalSupply[tokenId] == 0, 'existed');
+        name[tokenId] = _name;
+        symbol[tokenId] = _symbol;
+        attrValue[tokenId] = _attrValue;
+    }
+
+    function burn(address account, uint256 id, uint256 value) public override {
+        require(account == _msgSender() || isApprovedForAll(account, _msgSender()),
+            "ERC1155: caller is not owner nor approved");
+
+        _burn(account, id, value);
+    }
+
+    function burnBatch(address account, uint256[] memory ids, uint256[] memory values) public override {
+        require(account == _msgSender() || isApprovedForAll(account, _msgSender()),
+            "ERC1155: caller is not owner nor approved");
+
+        _burnBatch(account, ids, values);
+    }
+
+    function mint(address to, uint tokenId, uint amount) public override {
+        require(msg.sender == address(registry), 'only registry');
+        totalSupply[tokenId] += amount;
+        _mint(to, tokenId, amount, '');
+    }
+
+    function mintBatch(address to, uint[] memory tokenIds, uint[] memory amounts) public override {
+        require(msg.sender == address(registry), 'only registry');
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            totalSupply[tokenIds[i]] += amounts[i];
+        }
+        _mintBatch(to, tokenIds, amounts, '');
     }
 }

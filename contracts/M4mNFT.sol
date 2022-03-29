@@ -1,94 +1,108 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity =0.8.12;
 
+import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol';
 
-// @dev Meta-4d for me NFT with random attributes
-contract M4mNFT is ERC721EnumerableUpgradeable {
+import './interfaces/IM4mNFT.sol';
+import './interfaces/IM4mNFTRegistry.sol';
 
-    string[] internal style;
-    string[] internal hair;
-    string[] internal complexion;
-    string[] internal upper;
-    string[] internal lower;
-    string[] internal shoesAndSocks;
-    string[] internal tattoo;
-    string[] internal earrings;
-    string[] internal necklace;
-    string[] internal glass;
-    string[] internal backendEnv;
-    string[] internal frontendEnv;
+// @dev config attribute value when mint NFT
+contract M4mConfigurableNFT is OwnableUpgradeable, ERC721EnumerableUpgradeable, IM4mNFT {
 
     string private baseURI;
+    IM4mNFTRegistry public override registry;
 
-    // TODO: init attributes
-    /* initialize */
-    function initialize(string memory _baseURI) public virtual initializer {
-        __ERC721Enumerable_init();
-        baseURI = _baseURI;
-        style = ['2D', '3D'];
+    /* override attributes */
+    mapping(uint => uint) public override getStyle;
+
+    mapping(uint => uint) public override getHair;
+
+    mapping(uint => uint)public override  getComplexion;
+
+    mapping(uint => uint)public override  getUpper;
+
+    mapping(uint => uint) public override getLower;
+
+    mapping(uint => uint) public override getShoesAndSocks;
+
+    mapping(uint => uint) public override getEarrings;
+
+    mapping(uint => uint) public override getNecklace;
+
+    mapping(uint => uint) public override getGlass;
+
+    mapping(uint => uint) public override getBackendEnv;
+
+    mapping(uint => uint) public override getFrontendEnv;
+
+    function initialize(string memory __baseURI, IM4mNFTRegistry _registry) public initializer {
+        __Ownable_init_unchained();
+
+        baseURI = __baseURI;
+        registry = _registry;
     }
 
-    // tokenId starts from 0
-    function mint(address to) public virtual {
-        _safeMint(to, totalSupply());
+    function mintByRegistry(address to, uint style, uint hair, uint complexion,
+        uint upper, uint lower, uint shoesAndSocks, uint earrings,
+        uint necklace, uint glass, uint backendEnv, uint frontendEnv)
+    public override returns (uint tokenId){
+        require(msg.sender == address(registry));
+        tokenId = totalSupply();
+        _mint(to, tokenId, style, hair, complexion, upper, lower, shoesAndSocks, earrings, necklace, glass,
+            backendEnv, frontendEnv);
     }
 
-    /* view function */
-    function getStyle(uint tokenId) external virtual view returns (string memory) {
-        return pluck(tokenId, 'style', style);
+    function mintByOwner(address to, uint style, uint hair, uint complexion,
+        uint upper, uint lower, uint shoesAndSocks, uint earrings,
+        uint necklace, uint glass, uint backendEnv, uint frontendEnv)
+    public override onlyOwner returns (uint tokenId){
+        tokenId = totalSupply();
+        _mint(to, tokenId, style, hair, complexion, upper, lower, shoesAndSocks, earrings, necklace, glass,
+            backendEnv, frontendEnv);
     }
 
-    function getHair(uint tokenId) external virtual view returns (string memory) {
-        return pluck(tokenId, 'hair', hair);
+    function mint(address to) public override returns (uint tokenId){
+        tokenId = totalSupply();
+        uint style = pluck(tokenId, IM4mNFTRegistry.AttrName.STYLE);
+        uint hair = pluck(tokenId, IM4mNFTRegistry.AttrName.HAIR);
+        uint complexion = pluck(tokenId, IM4mNFTRegistry.AttrName.COMPLEXION);
+        uint upper = pluck(tokenId, IM4mNFTRegistry.AttrName.UPPER);
+        uint lower = pluck(tokenId, IM4mNFTRegistry.AttrName.LOWER);
+        uint shoesAndSocks = pluck(tokenId, IM4mNFTRegistry.AttrName.SHOES_AND_SOCKS);
+        uint earrings = pluck(tokenId, IM4mNFTRegistry.AttrName.EARRINGS);
+        uint necklace = pluck(tokenId, IM4mNFTRegistry.AttrName.NECKLACE);
+        uint glass = pluck(tokenId, IM4mNFTRegistry.AttrName.GLASS);
+        uint backendEnv = pluck(tokenId, IM4mNFTRegistry.AttrName.BACKEND_ENV);
+        uint frontendEnv = pluck(tokenId, IM4mNFTRegistry.AttrName.FRONTEND_ENV);
+
+        _mint(to, tokenId, style, hair, complexion, upper, lower, shoesAndSocks, earrings, necklace, glass, backendEnv,
+            frontendEnv);
     }
 
-    function getComplexion(uint tokenId) external virtual view returns (string memory) {
-        return pluck(tokenId, 'complexion', complexion);
+    function _mint(address to, uint tokenId, uint style, uint hair, uint complexion,
+        uint upper, uint lower, uint shoesAndSocks, uint earrings,
+        uint necklace, uint glass, uint backendEnv, uint frontendEnv) private {
+
+        getStyle[tokenId] = style;
+        getHair[tokenId] = hair;
+        getComplexion[tokenId] = complexion;
+        getUpper[tokenId] = upper;
+        getLower[tokenId] = lower;
+        getShoesAndSocks[tokenId] = shoesAndSocks;
+        getEarrings[tokenId] = earrings;
+        getNecklace[tokenId] = necklace;
+        getGlass[tokenId] = glass;
+        getBackendEnv[tokenId] = backendEnv;
+        getFrontendEnv[tokenId] = frontendEnv;
+
+        _safeMint(to, tokenId);
     }
 
-    function getUpper(uint tokenId) external virtual view returns (string memory) {
-        return pluck(tokenId, 'upper', upper);
-    }
-
-    function getLower(uint tokenId) external virtual view returns (string memory) {
-        return pluck(tokenId, 'lower', lower);
-    }
-
-    function getShoesAndSocks(uint tokenId) external virtual view returns (string memory) {
-        return pluck(tokenId, 'shoesAndSocks', shoesAndSocks);
-    }
-
-    function getEarrings(uint tokenId) external virtual view returns (string memory) {
-        return pluck(tokenId, 'earrings', earrings);
-    }
-
-    function getNecklace(uint tokenId) external virtual view returns (string memory) {
-        return pluck(tokenId, 'necklace', necklace);
-    }
-
-    function getGlass(uint tokenId) external virtual view returns (string memory) {
-        return pluck(tokenId, 'glass', glass);
-    }
-
-    function getBackendEnv(uint tokenId) external virtual view returns (string memory) {
-        return pluck(tokenId, 'backendEnv', backendEnv);
-    }
-
-    function getFrontendEnv(uint tokenId) external virtual view returns (string memory) {
-        return pluck(tokenId, 'frontendEnv', frontendEnv);
-    }
-
-    /* private function */
-    function random(string memory input) internal pure returns (uint256) {
-        return uint256(keccak256(abi.encodePacked(input)));
-    }
-
-    function pluck(uint256 tokenId, string memory keyPrefix, string[] memory sourceArray) internal view returns (string memory) {
-        // use block hash to increase randomness
-        uint256 rand = random(string(abi.encodePacked(blockhash(block.number), keyPrefix, toString(tokenId))));
-        string memory output = sourceArray[rand % sourceArray.length];
-        return output;
+    function pluck(uint256 tokenId, IM4mNFTRegistry.AttrName attrName) private view returns (uint) {
+        uint[] memory sourceArray = registry.attrTokenIds(attrName);
+        uint256 rand = uint256(keccak256(abi.encodePacked(blockhash(block.number), attrName, toString(tokenId))));
+        return sourceArray[rand % sourceArray.length];
     }
 
     function toString(uint256 value) internal pure returns (string memory) {
@@ -111,5 +125,9 @@ contract M4mNFT is ERC721EnumerableUpgradeable {
             value /= 10;
         }
         return string(buffer);
+    }
+
+    function _baseURI() internal view override returns (string memory) {
+        return baseURI;
     }
 }
