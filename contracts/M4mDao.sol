@@ -15,8 +15,12 @@ contract M4mDao is OwnableUpgradeable, ERC721HolderUpgradeable, IM4mDAO {
 
     IM4mNFT public override m4mNFT;
 
+    mapping(uint => mapping(address => mapping(IERC721 => mapping(uint => bool)))) public override convertRecord;
+
     /* events */
     event SetConvertibleList(IERC721 nft, bool enabled);
+    event ConvertToM4mNFT(address owner, IERC721 origin, uint tokenId, uint m4mTokenId);
+    event Redeem(address owner, IERC721 origin, uint tokenId, uint m4mTokenId);
 
     function initialize(IM4mNFT _m4mNFT) public initializer {
         __Ownable_init_unchained();
@@ -31,6 +35,16 @@ contract M4mDao is OwnableUpgradeable, ERC721HolderUpgradeable, IM4mDAO {
 
     function convertToM4mNFT(IERC721 origin, uint tokenId) public override {
         origin.safeTransferFrom(msg.sender, address(this), tokenId);
-        m4mNFT.mint(msg.sender);
+        uint m4mTokenId = m4mNFT.mint(msg.sender);
+        convertRecord[m4mTokenId][msg.sender][origin][tokenId] = true;
+        emit ConvertToM4mNFT(msg.sender, origin, tokenId, m4mTokenId);
+    }
+
+    function redeem(uint m4mTokenId, IERC721 origin, uint tokenId) public override {
+        require(convertRecord[m4mTokenId][msg.sender][origin][tokenId], 'no record');
+        origin.safeTransferFrom(address(this), msg.sender, tokenId);
+        m4mNFT.burn(tokenId);
+        convertRecord[m4mTokenId][msg.sender][origin][tokenId] = false;
+        emit Redeem(msg.sender, origin, tokenId, m4mTokenId);
     }
 }

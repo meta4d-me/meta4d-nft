@@ -8,7 +8,7 @@ import './interfaces/IM4mNFT.sol';
 import './interfaces/IM4mNFTRegistry.sol';
 
 // @dev config attribute value when mint NFT
-contract M4mConfigurableNFT is OwnableUpgradeable, ERC721EnumerableUpgradeable, IM4mNFT {
+contract M4mNFT is OwnableUpgradeable, ERC721EnumerableUpgradeable, IM4mNFT {
 
     string private baseURI;
     IM4mNFTRegistry public override registry;
@@ -43,6 +43,11 @@ contract M4mConfigurableNFT is OwnableUpgradeable, ERC721EnumerableUpgradeable, 
         registry = _registry;
     }
 
+    function burn(uint256 tokenId) public override {
+        require(_isApprovedOrOwner(_msgSender(), tokenId), "caller is not owner nor approved");
+        _burn(tokenId);
+    }
+
     function mintByRegistry(address to, uint style, uint hair, uint complexion,
         uint upper, uint lower, uint shoesAndSocks, uint earrings,
         uint necklace, uint glass, uint backendEnv, uint frontendEnv)
@@ -58,6 +63,17 @@ contract M4mConfigurableNFT is OwnableUpgradeable, ERC721EnumerableUpgradeable, 
         uint necklace, uint glass, uint backendEnv, uint frontendEnv)
     public override onlyOwner returns (uint tokenId){
         tokenId = totalSupply();
+        require(registry.attrTokenIdEnabled(IM4mNFTRegistry.AttrName.STYLE, style), 'ill style');
+        require(registry.attrTokenIdEnabled(IM4mNFTRegistry.AttrName.HAIR, hair), 'ill hair');
+        require(registry.attrTokenIdEnabled(IM4mNFTRegistry.AttrName.COMPLEXION, complexion), 'ill complexion');
+        require(registry.attrTokenIdEnabled(IM4mNFTRegistry.AttrName.UPPER, upper), 'ill upper');
+        require(registry.attrTokenIdEnabled(IM4mNFTRegistry.AttrName.LOWER, lower), 'ill lower');
+        require(registry.attrTokenIdEnabled(IM4mNFTRegistry.AttrName.SHOES_AND_SOCKS, shoesAndSocks), 'ill shoesAndSocks');
+        require(registry.attrTokenIdEnabled(IM4mNFTRegistry.AttrName.EARRINGS, earrings), 'ill earrings');
+        require(registry.attrTokenIdEnabled(IM4mNFTRegistry.AttrName.NECKLACE, necklace), 'ill necklace');
+        require(registry.attrTokenIdEnabled(IM4mNFTRegistry.AttrName.GLASS, glass), 'ill glass');
+        require(registry.attrTokenIdEnabled(IM4mNFTRegistry.AttrName.BACKEND_ENV, backendEnv), 'ill backendEnv');
+        require(registry.attrTokenIdEnabled(IM4mNFTRegistry.AttrName.FRONTEND_ENV, frontendEnv), 'ill frontendEnv');
         _mint(to, tokenId, style, hair, complexion, upper, lower, shoesAndSocks, earrings, necklace, glass,
             backendEnv, frontendEnv);
     }

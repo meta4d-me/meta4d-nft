@@ -31,15 +31,13 @@ contract M4mComponent is ERC1155Upgradeable, OwnableUpgradeable, IM4mComponents 
     }
 
     function burn(address account, uint256 id, uint256 value) public override {
-        require(account == _msgSender() || isApprovedForAll(account, _msgSender()),
-            "ERC1155: caller is not owner nor approved");
+        require(account == _msgSender() || isApprovedForAll(account, _msgSender()), "caller is not owner nor approved");
 
         _burn(account, id, value);
     }
 
     function burnBatch(address account, uint256[] memory ids, uint256[] memory values) public override {
-        require(account == _msgSender() || isApprovedForAll(account, _msgSender()),
-            "ERC1155: caller is not owner nor approved");
+        require(account == _msgSender() || isApprovedForAll(account, _msgSender()), "caller is not owner nor approved");
 
         _burnBatch(account, ids, values);
     }

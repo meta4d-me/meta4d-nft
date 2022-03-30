@@ -2,13 +2,15 @@
 pragma solidity =0.8.12;
 
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol';
+
 import './interfaces/IM4mNFT.sol';
 import './interfaces/IM4mComponents.sol';
 import './interfaces/IM4mNFTRegistry.sol';
 
 // @dev manage all kinds of components
 
-contract M4mNFTRegistry is OwnableUpgradeable, IM4mNFTRegistry {
+contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, IM4mNFTRegistry {
 
     /// @notice Meta-4D.me NFT
     address public override m4mNFT;
@@ -20,17 +22,36 @@ contract M4mNFTRegistry is OwnableUpgradeable, IM4mNFTRegistry {
     // attrName => tokenId => enabled
     mapping(AttrName => mapping(uint => bool)) public override attrTokenIdEnabled;
 
-    // TODO: init component
     function initialize(IM4mComponents _components, address _m4mNFT) public initializer {
         __Ownable_init_unchained();
+        __ERC721Holder_init_unchained();
 
         components = _components;
         m4mNFT = _m4mNFT;
+
+        // TODO: init value correctly
+        addComponentInternal(0, AttrName.STYLE, 'M4m 2D Style', '2D-STYLE', '2D');
+        addComponentInternal(1, AttrName.STYLE, 'M4m 3D Style', '3D-STYLE', '3D');
+        addComponentInternal(2, AttrName.HAIR, 'M4m Red HAIR', 'RED-HAIR', 'RED');
+        addComponentInternal(3, AttrName.COMPLEXION, 'M4m White COMPLEXION', 'WHITE-COMPLEXION', 'WHITE');
+        addComponentInternal(4, AttrName.UPPER, 'M4m Jacket UPPER', 'Jacket-UPPER', 'Jacket');
+        addComponentInternal(5, AttrName.LOWER, 'M4m Skirt LOWER', 'Skirt-LOWER', 'Skirt');
+        addComponentInternal(6, AttrName.SHOES_AND_SOCKS, 'M4m Test SHOES_AND_SOCKS', 'Test-SHOES_AND_SOCKS', 'Test');
+        addComponentInternal(7, AttrName.EARRINGS, 'M4m Test EARRINGS', 'Test-SHOES_AND_SOCKS', 'Test');
+        addComponentInternal(8, AttrName.NECKLACE, 'M4m Test NECKLACE', 'Test-NECKLACE', 'Test');
+        addComponentInternal(9, AttrName.GLASS, 'M4m Test GLASS', 'Test-GLASS', 'Test');
+        addComponentInternal(10, AttrName.BACKEND_ENV, 'M4m Test BACKEND_ENV', 'Test-BACKEND_ENV', 'Test');
+        addComponentInternal(11, AttrName.FRONTEND_ENV, 'M4m Test FRONTEND_ENV', 'Test-FRONTEND_ENV', 'Test');
     }
 
     function addComponent(uint tokenId, AttrName attrName, string memory name, string memory symbol,
         string memory value) public override onlyOwner {
         require(!attrTokenIdEnabled[attrName][tokenId], 'existed');
+        addComponentInternal(tokenId, attrName, name, symbol, value);
+    }
+
+    function addComponentInternal(uint tokenId, AttrName attrName, string memory name, string memory symbol,
+        string memory value) private {
         components.prepareNewToken(tokenId, name, symbol, value);
         _attrTokenIds[attrName].push(tokenId);
         attrTokenIdEnabled[attrName][tokenId] = true;
@@ -82,6 +103,24 @@ contract M4mNFTRegistry is OwnableUpgradeable, IM4mNFTRegistry {
         require(attrTokenIdEnabled[AttrName.GLASS][glass], 'ill glass');
         require(attrTokenIdEnabled[AttrName.BACKEND_ENV][backendEnv], 'ill backendEnv');
         require(attrTokenIdEnabled[AttrName.FRONTEND_ENV][frontendEnv], 'ill frontendEnv');
+
+        uint[] memory amounts = new uint[](11);
+        for (uint i = 0; i < 11; i++) {
+            amounts[i] = 1;
+        }
+        uint[] memory ids = new uint[](11);
+        ids[0] = style;
+        ids[1] = hair;
+        ids[2] = complexion;
+        ids[3] = upper;
+        ids[4] = lower;
+        ids[5] = shoesAndSocks;
+        ids[6] = earrings;
+        ids[7] = necklace;
+        ids[8] = glass;
+        ids[9] = backendEnv;
+        ids[10] = frontendEnv;
+        components.burnBatch(msg.sender, ids, amounts);
         IM4mNFT(m4mNFT).mintByRegistry(msg.sender, style, hair, complexion, upper, lower, shoesAndSocks, earrings,
             necklace, glass, backendEnv, frontendEnv);
     }

@@ -10,7 +10,11 @@ interface IM4mDAO {
 
     function convertibleList(IERC721 nft) external view returns (bool);
 
+    function convertRecord(uint m4mTokenId, address user, IERC721 nft, uint originalTokenId) external view returns (bool);
+
     function setConvertibleList(IERC721 nft, bool enabled) external;
 
     function convertToM4mNFT(IERC721 origin, uint tokenId) external;
+
+    function redeem(uint m4mTokenId, IERC721 origin, uint tokenId) external;
 }
