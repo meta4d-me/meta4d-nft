@@ -11,7 +11,7 @@ async function deploy() {
     const M4mComponent = await ethers.getContractFactory('M4mComponent');
     const m4mComponent = await upgrades.deployProxy(M4mComponent, ['ipfs://test/', m4mNFTRegistry.address]);
 
-    await m4mNFT.initialize('ipfs://test/', m4mNFTRegistry.address);
+    await m4mNFT.initialize('ipfs://test/', m4mNFTRegistry.address, m4mDao.address);
     await m4mNFTRegistry.initialize(m4mComponent.address, m4mNFT.address);
     return {m4mNFT, m4mDao, m4mNFTRegistry, m4mComponent};
 }

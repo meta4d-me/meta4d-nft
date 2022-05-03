@@ -13,11 +13,9 @@ interface IM4mComponents is IERC1155Upgradeable {
 
     function symbol(uint tokenId) external view returns (string memory);
 
-    function attrValue(uint tokenId) external view returns (string memory);
-
     function totalSupply(uint tokenId) external view returns (uint);
 
-    function prepareNewToken(uint tokenId, string memory name, string memory symbol, string memory attrValue) external;
+    function prepareNewToken(uint tokenId, string memory name, string memory symbol) external;
 
     function mint(address to, uint tokenId, uint amount) external;
 

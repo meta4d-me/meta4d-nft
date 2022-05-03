@@ -1,151 +1,87 @@
 const {expect} = require("chai");
 const deploy = require('../scripts/deploy');
-const AttrName = {
-    STYLE: 0,
-    HAIR: 1,
-    COMPLEXION: 2,
-    UPPER: 3,
-    LOWER: 4,
-    SHOES_AND_SOCKS: 5,
-    EARRINGS: 6,
-    NECKLACE: 7,
-    GLASS: 8,
-    BACKEND_ENV: 9,
-    FRONTEND_ENV: 10
-};
+const env = require('../.env.json');
 
 describe("Split and Assemble", function () {
     let nft, components, registry;
     let owner;
+    let operatorSigningKey;
     it('deploy', async function () {
         let deployments = await deploy.deploy();
         nft = deployments.m4mNFT;
         components = deployments.m4mComponent;
         registry = deployments.m4mNFTRegistry;
-        owner = await ethers.getSigner();
+        [owner] = await ethers.getSigners();
+        operatorSigningKey = new ethers.utils.SigningKey('0x' + env.PRIVATE_KEY_2);
+        await registry.setOperator(ethers.utils.computeAddress(operatorSigningKey.publicKey));
     });
     it('add new attribute value', async function () {
-        await registry.addComponent(12, AttrName.HAIR, 'M4m Test1 HAIR', 'Test1-HAIR', 'Test1');
-        await registry.addComponent(13, AttrName.COMPLEXION, 'M4m Test1 COMPLEXION', 'Test1-COMPLEXION', 'Test1');
-        await registry.addComponent(14, AttrName.UPPER, 'M4m Test1 UPPER', 'Test1-UPPER', 'Test1');
-        await registry.addComponent(15, AttrName.LOWER, 'M4m Test1 LOWER', 'Test1-LOWER', 'Test1');
-        await registry.addComponent(16, AttrName.SHOES_AND_SOCKS, 'M4m Test1 SHOES_AND_SOCKS', 'Test1-SHOES_AND_SOCKS', 'Test1');
-        await registry.addComponent(17, AttrName.EARRINGS, 'M4m Test1 EARRINGS', 'Test1-SHOES_AND_SOCKS', 'Test1');
-        await registry.addComponent(18, AttrName.NECKLACE, 'M4m Test1 NECKLACE', 'Test1-NECKLACE', 'Test1');
-        await registry.addComponent(19, AttrName.GLASS, 'M4m Test1 GLASS', 'Test1-GLASS', 'Test1');
-        await registry.addComponent(20, AttrName.BACKEND_ENV, 'M4m Test1 BACKEND_ENV', '2D-BACKEND_ENV', 'Test1');
-        await registry.addComponent(21, AttrName.FRONTEND_ENV, 'M4m Test1 FRONTEND_ENV', '2D-FRONTEND_ENV', 'Test1');
-        expect((await registry.attrTokenIds(AttrName.STYLE)).length).to.eq(2);
-        expect((await registry.attrTokenIds(AttrName.HAIR)).length).to.eq(2);
-        expect((await registry.attrTokenIds(AttrName.COMPLEXION)).length).to.eq(2);
-        expect((await registry.attrTokenIds(AttrName.UPPER)).length).to.eq(2);
-        expect((await registry.attrTokenIds(AttrName.LOWER)).length).to.eq(2);
-        expect((await registry.attrTokenIds(AttrName.SHOES_AND_SOCKS)).length).to.eq(2);
-        expect((await registry.attrTokenIds(AttrName.EARRINGS)).length).to.eq(2);
-        expect((await registry.attrTokenIds(AttrName.NECKLACE)).length).to.eq(2);
-        expect((await registry.attrTokenIds(AttrName.GLASS)).length).to.eq(2);
-        expect((await registry.attrTokenIds(AttrName.BACKEND_ENV)).length).to.eq(2);
-        expect((await registry.attrTokenIds(AttrName.FRONTEND_ENV)).length).to.eq(2);
-    });
-    it('mint a random NFT', async function () {
-        await nft.mint(owner.address);
-        const m4mNFT0 = await fetchNFT(nft, components, 0);
-        console.log(JSON.stringify(m4mNFT0, '', '   '));
+        await components.prepareNewToken(0, 'M4m 2D Style', '2D-STYLE');
+        await components.prepareNewToken(1, 'M4m 3D Style', '3D-STYLE');
+        await components.prepareNewToken(2, 'M4m Red HAIR', 'RED-HAIR');
+        await components.prepareNewToken(3, 'M4m White COMPLEXION', 'WHITE-COMPLEXION');
+        await components.prepareNewToken(4, 'M4m Jacket UPPER', 'Jacket-UPPER');
+        await components.prepareNewToken(5, 'M4m Skirt LOWER', 'Skirt-LOWER');
+        await components.prepareNewToken(6, 'M4m Test SHOES_AND_SOCKS', 'Test-SHOES_AND_SOCKS');
+        await components.prepareNewToken(7, 'M4m Test EARRINGS', 'Test-SHOES_AND_SOCKS');
+        await components.prepareNewToken(8, 'M4m Test NECKLACE', 'Test-NECKLACE');
+        await components.prepareNewToken(9, 'M4m Test GLASS', 'Test-GLASS');
+        await components.prepareNewToken(10, 'M4m Test BACKEND_ENV', 'Test-BACKEND_ENV');
+        await components.prepareNewToken(11, 'M4m Test FRONTEND_ENV', 'Test-FRONTEND_ENV');
+        await components.prepareNewToken(12, 'M4m Test1 HAIR', 'Test1-HAIR');
+        await components.prepareNewToken(13, 'M4m Test1 COMPLEXION', 'Test1-COMPLEXION');
+        await components.prepareNewToken(14, 'M4m Test1 UPPER', 'Test1-UPPER');
+        await components.prepareNewToken(15, 'M4m Test1 LOWER', 'Test1-LOWER');
+        await components.prepareNewToken(16, 'M4m Test1 SHOES_AND_SOCKS', 'Test1-SHOES_AND_SOCKS');
+        await components.prepareNewToken(17, 'M4m Test1 EARRINGS', 'Test1-SHOES_AND_SOCKS');
+        await components.prepareNewToken(18, 'M4m Test1 NECKLACE', 'Test1-NECKLACE');
+        await components.prepareNewToken(19, 'M4m Test1 GLASS', 'Test1-GLASS');
+        await components.prepareNewToken(20, 'M4m Test1 BACKEND_ENV', '2D-BACKEND_ENV');
+        await components.prepareNewToken(21, 'M4m Test1 FRONTEND_ENV', '2D-FRONTEND_ENV');
     });
     it('mint a NFT', async function () {
-        const style = await registry.attrTokenIds(AttrName.STYLE);
-        const hair = await registry.attrTokenIds(AttrName.HAIR);
-        const complexion = await registry.attrTokenIds(AttrName.COMPLEXION);
-        const upper = await registry.attrTokenIds(AttrName.UPPER);
-        const lower = await registry.attrTokenIds(AttrName.LOWER);
-        const shoesAndSocks = await registry.attrTokenIds(AttrName.SHOES_AND_SOCKS);
-        const earrings = await registry.attrTokenIds(AttrName.EARRINGS);
-        const necklace = await registry.attrTokenIds(AttrName.NECKLACE);
-        const glass = await registry.attrTokenIds(AttrName.GLASS);
-        const backendEnv = await registry.attrTokenIds(AttrName.BACKEND_ENV);
-        const frontendEnv = await registry.attrTokenIds(AttrName.FRONTEND_ENV);
-        await nft.mintByOwner(owner.address, style[0], hair[0], complexion[0], upper[0], lower[0], shoesAndSocks[0],
-            earrings[0], necklace[0], glass[0], backendEnv[0], frontendEnv[0]);
-        const m4mNFT1 = await fetchNFT(nft, components, 1);
-        console.log(JSON.stringify(m4mNFT1, '', '   '));
-    });
-    it('cannot mint a NFT with error attribute value', async function () {
-        const style = await registry.attrTokenIds(AttrName.STYLE);
-        const complexion = await registry.attrTokenIds(AttrName.COMPLEXION);
-        const upper = await registry.attrTokenIds(AttrName.UPPER);
-        const lower = await registry.attrTokenIds(AttrName.LOWER);
-        const shoesAndSocks = await registry.attrTokenIds(AttrName.SHOES_AND_SOCKS);
-        const earrings = await registry.attrTokenIds(AttrName.EARRINGS);
-        const necklace = await registry.attrTokenIds(AttrName.NECKLACE);
-        const backendEnv = await registry.attrTokenIds(AttrName.BACKEND_ENV);
-        await expect(nft.mintByOwner(owner.address, style[0], style[0], complexion[0], upper[0], lower[0], shoesAndSocks[0],
-            earrings[0], necklace[0], style[0], backendEnv[0], style[0])).to.be.reverted;
+        await nft.mint(owner.address);
+        expect(await nft.balanceOf(owner.address)).to.eq(1);
     });
     it('split', async function () {
         await nft.setApprovalForAll(registry.address, true);
-        await registry.splitM4mNFT(0);
+        let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        let hash = ethers.utils.solidityKeccak256(['bytes'],
+            [ethers.utils.solidityPack(['uint[11]', 'uint[11]'], [componentIds, amounts])]);
+        let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
+        await registry.splitM4mNFT(0, componentIds, amounts, sig);
         expect(await nft.ownerOf(0)).to.eq(registry.address);
-        const componentsBalance = await getComponentsBalanceOfNFT(owner, nft, components, 0);
-        for (const componentsBalanceElement of componentsBalance) {
-            expect(componentsBalanceElement).to.eq(1);
+        for (const id of componentIds) {
+            expect(await components.balanceOf(owner.address, id)).to.eq(1);
         }
     });
     it('assemble to new NFT', async function () {
         await components.setApprovalForAll(registry.address, true);
         let snapshot = await network.provider.send("evm_snapshot");
-        const componentsTokenIds = await fetchComponentsTokenId(nft, 0);
-        await registry.functions[
-            'assembleM4mNFT(uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256,uint256)']
-        (componentsTokenIds[0], componentsTokenIds[1], componentsTokenIds[2], componentsTokenIds[3], componentsTokenIds[4],
-            componentsTokenIds[5], componentsTokenIds[6], componentsTokenIds[7], componentsTokenIds[8],
-            componentsTokenIds[9], componentsTokenIds[10]);
-        expect(await nft.ownerOf(2)).to.eq(owner.address);
-        const componentsBalance = await getComponentsBalanceOfNFT(owner, nft, components, 2);
-        for (const componentsBalanceElement of componentsBalance) {
-            expect(componentsBalanceElement).to.eq(0);
+        let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        let hash = ethers.utils.solidityKeccak256(['bytes'],
+            [ethers.utils.solidityPack(['uint[11]', 'uint[11]'], [componentIds, amounts])]);
+        let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
+        await registry.assembleM4mNFT(componentIds, amounts, sig);
+        expect(await nft.ownerOf(1)).to.eq(owner.address);
+        for (const id of componentIds) {
+            expect(await components.totalSupply(id)).to.eq(0);
         }
         await network.provider.send("evm_revert", [snapshot]);
     });
     it('assemble to original NFT', async function () {
-        await registry.functions['assembleM4mNFT(uint256)'](0);
+        let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        let hash = ethers.utils.solidityKeccak256(['bytes'],
+            [ethers.utils.solidityPack(['uint[11]', 'uint[11]'], [componentIds, amounts])]);
+        let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
+        await registry.assembleOriginalM4mNFT(0, componentIds, amounts, sig);
         expect(await nft.ownerOf(0)).to.eq(owner.address);
-        const componentsBalance = await getComponentsBalanceOfNFT(owner, nft, components, 0);
-        for (const componentsBalanceElement of componentsBalance) {
-            expect(componentsBalanceElement).to.eq(0);
+        for (const id of componentIds) {
+            expect(await components.balanceOf(owner.address, id)).to.eq(0);
+            expect(await components.totalSupply(id)).to.eq(0);
         }
     });
 })
-
-async function fetchNFT(m4mNFT, m4mComponents, tokenId) {
-    return {
-        style: await m4mComponents.attrValue(await m4mNFT.getStyle(tokenId)),
-        hair: await m4mComponents.attrValue(await m4mNFT.getHair(tokenId)),
-        complexion: await m4mComponents.attrValue(await m4mNFT.getComplexion(tokenId)),
-        upper: await m4mComponents.attrValue(await m4mNFT.getUpper(tokenId)),
-        lower: await m4mComponents.attrValue(await m4mNFT.getLower(tokenId)),
-        shoesAndSocks: await m4mComponents.attrValue(await m4mNFT.getShoesAndSocks(tokenId)),
-        earrings: await m4mComponents.attrValue(await m4mNFT.getEarrings(tokenId)),
-        necklace: await m4mComponents.attrValue(await m4mNFT.getNecklace(tokenId)),
-        glass: await m4mComponents.attrValue(await m4mNFT.getGlass(tokenId)),
-        backendEnv: await m4mComponents.attrValue(await m4mNFT.getBackendEnv(tokenId)),
-        frontendEnv: await m4mComponents.attrValue(await m4mNFT.getFrontendEnv(tokenId))
-    };
-}
-
-
-async function fetchComponentsTokenId(nft, tokenId) {
-    return [
-        await nft.getStyle(tokenId), await nft.getHair(tokenId), await nft.getComplexion(tokenId),
-        await nft.getUpper(tokenId), await nft.getLower(tokenId), await nft.getShoesAndSocks(tokenId),
-        await nft.getEarrings(tokenId), await nft.getNecklace(tokenId), await nft.getGlass(tokenId),
-        await nft.getBackendEnv(tokenId), await nft.getFrontendEnv(tokenId)
-    ];
-}
-
-async function getComponentsBalanceOfNFT(owner, nft, components, tokenId) {
-    const accounts = [];
-    for (let i = 0; i < 11; i++) {
-        accounts.push(owner.address)
-    }
-    return await components.balanceOfBatch(accounts, await fetchComponentsTokenId(nft, tokenId));
-}

@@ -11,7 +11,7 @@ describe("Meta-4d.me DAO", function () {
         owner = await ethers.getSigner();
         const NFT = await ethers.getContractFactory('M4mNFT');
         otherNFT = await NFT.deploy();
-        await otherNFT.initialize('test', deployments.m4mNFTRegistry.address);
+        await otherNFT.initialize('test', deployments.m4mNFTRegistry.address, dao.address);
     });
     it('set convertible list', async function () {
         expect(await dao.convertibleList(otherNFT.address)).to.eq(false);
