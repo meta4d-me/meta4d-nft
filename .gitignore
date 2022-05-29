@@ -110,3 +110,5 @@ artifacts
 cache
 .env.json
 .openzeppelin/unknown-31337.json
+assets
+typechain-types

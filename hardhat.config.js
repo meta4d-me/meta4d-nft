@@ -1,3 +1,4 @@
+require('@typechain/hardhat');
 require("@nomiclabs/hardhat-waffle");
 require('@openzeppelin/hardhat-upgrades');
 require("@nomiclabs/hardhat-etherscan");
