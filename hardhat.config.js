@@ -49,7 +49,7 @@ module.exports = {
             accounts: [`0x${PRIV_1}`, `0x${PRIV_2}`, `0x${PRIV_3}`]
         },
         mumbai: {
-            url: 'https://polygon-rpc.com/',
+            url: 'https://matic-mumbai.chainstacklabs.com',
             accounts: [`0x${PRIV_1}`, `0x${PRIV_2}`, `0x${PRIV_3}`]
         }
     }
