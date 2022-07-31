@@ -12,9 +12,9 @@ contract M4mComponent is ERC1155Upgradeable, OwnableUpgradeable, IM4mComponents 
     mapping(uint => string) public override symbol;
     mapping(uint => uint) public override totalSupply;
 
-    IM4mNFTRegistry public override registry;
+    address public override registry;
 
-    function initialize(string memory uri, IM4mNFTRegistry _registry) public initializer {
+    function initialize(string memory uri, address _registry) public initializer {
         __ERC1155_init_unchained(uri);
         __Ownable_init_unchained();
         registry = _registry;
@@ -44,14 +44,14 @@ contract M4mComponent is ERC1155Upgradeable, OwnableUpgradeable, IM4mComponents 
     }
 
     function mint(address to, uint tokenId, uint amount) public override {
-        require(msg.sender == address(registry), 'only registry');
+        require(msg.sender == registry, 'only registry');
         checkInit(tokenId);
         totalSupply[tokenId] += amount;
         _mint(to, tokenId, amount, '');
     }
 
     function mintBatch(address to, uint[] memory tokenIds, uint[] memory amounts) public override {
-        require(msg.sender == address(registry), 'only registry');
+        require(msg.sender == registry, 'only registry');
         for (uint256 i = 0; i < tokenIds.length; i++) {
             checkInit(tokenIds[i]);
             totalSupply[tokenIds[i]] += amounts[i];

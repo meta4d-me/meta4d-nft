@@ -3,11 +3,9 @@ pragma solidity =0.8.12;
 
 import '@openzeppelin/contracts-upgradeable/token/ERC1155/IERC1155Upgradeable.sol';
 
-import './IM4mNFTRegistry.sol';
-
 interface IM4mComponents is IERC1155Upgradeable {
 
-    function registry() external view returns (IM4mNFTRegistry);
+    function registry() external view returns (address);
 
     function name(uint tokenId) external view returns (string memory);
 
