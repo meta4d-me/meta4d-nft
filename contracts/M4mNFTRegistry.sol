@@ -90,7 +90,7 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
         SplitToken storage splitToken = splitTokens[tokenId];
         require(splitToken.status == TokenStatus.Initialized, 'ill status');
         // check redeemed or owner
-        /// @dev user could split redundant attrs after redeem
+        /// @dev anyone could split redundant attrs after redeem
         require(splitToken.status == TokenStatus.Redeemed || m4mNFT.ownerOf(tokenId) == msg.sender, 'ill status');
 
         for (uint i = 0; i < componentIds.length; i++) {
@@ -124,6 +124,7 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
         require(splitToken.status == TokenStatus.Initialized, 'ill status');
         bytes32 hash = keccak256(abi.encodePacked(componentIds, amounts));
         require(hash == splitToken.originalAttrHash, 'ill attrs');
+        require(m4mNFT.ownerOf(tokenId) == msg.sender, 'ill owner');
 
         /* burn components */
         for (uint i = 0; i < componentIds.length; i++) {
@@ -132,6 +133,7 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
             splitToken.components[componentIds[i]] -= amounts[i];
         }
         components.burnBatch(msg.sender, componentIds, amounts);
+        splitToken.status = TokenStatus.Redeemed;
 
         /* burn m4mNFT and redeem original nft */
         require(convertRecord[m4mTokenId][msg.sender][origin][tokenId], 'no record');
@@ -139,6 +141,22 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
         m4mNFT.burn(tokenId);
         convertRecord[m4mTokenId][msg.sender][origin][tokenId] = false;
         emit Redeem(msg.sender, origin, tokenId, m4mTokenId);
+    }
+
+    function lock(uint tokenId) public override {
+        SplitToken storage splitToken = splitTokens[tokenId];
+        require(splitToken.status == TokenStatus.Initialized, 'ill status');
+        require(m4mNFT.ownerOf(tokenId) == msg.sender, 'ill owner');
+
+        splitToken.status = TokenStatus.Locked;
+    }
+
+    function unlock(uint tokenId) public override {
+        SplitToken storage splitToken = splitTokens[tokenId];
+        require(splitToken.status == TokenStatus.Locked, 'ill status');
+        require(m4mNFT.ownerOf(tokenId) == msg.sender, 'ill owner');
+
+        splitToken.status = TokenStatus.Initialized;
     }
 
     function getSplitToken(uint tokenId) public view returns (TokenStatus, bytes32){

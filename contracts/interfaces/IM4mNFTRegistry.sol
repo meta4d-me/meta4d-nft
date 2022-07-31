@@ -14,7 +14,7 @@ interface IM4mNFTRegistry {
 
     function operator() external view returns (address);
 
-    enum TokenStatus{NotExist, Initialized, Redeemed}
+    enum TokenStatus{NotExist, Initialized, Locked, Redeemed}
     function getSplitToken(uint tokenId) external view returns (TokenStatus, bytes32);
 
     function getSplitTokenComponentAmount(uint componentId) external view returns (uint);
@@ -32,4 +32,8 @@ interface IM4mNFTRegistry {
     function assembleM4mNFT(uint tokenId, uint[]memory componentIds, uint[]memory amounts) external;
 
     function redeem(IERC721 origin, uint tokenId, uint m4mTokenId, uint[]memory componentIds, uint[]memory amounts) external;
+
+    function lock(uint tokenId) external;
+
+    function unlock(uint tokenId) external;
 }

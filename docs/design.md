@@ -20,11 +20,11 @@
 - split attributes
     - unbind ERC1155 from M4M-NFT
     - transfer ERC1155 to user
+    - if there are redundant attributes after redeem, anyone could get these
 - assemble attributes
     - require M4M-NFT owned any attributes or it has been split
     - could assemble any times
 - redeem NFT by burn M4M-NFT
     - require burn M4M-NFT with its initial attributes
-- split redundant attributes
-    - could only be called after redeem
-    - transfer ERC1155 to user
+- lock and unlock
+    - could not transfer, split, assemble and redeem locked token

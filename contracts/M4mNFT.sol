@@ -4,6 +4,7 @@ pragma solidity =0.8.12;
 import '@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol';
 
 import './interfaces/IM4mNFT.sol';
+import './interfaces/IM4mNFTRegistry.sol';
 
 // @dev config attribute value when mint NFT
 contract M4mNFT is ERC721EnumerableUpgradeable, IM4mNFT {
@@ -33,5 +34,15 @@ contract M4mNFT is ERC721EnumerableUpgradeable, IM4mNFT {
 
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override {
+        super._beforeTokenTransfer(from, to, tokenId);
+        (IM4mNFTRegistry.TokenStatus status,) = IM4mNFTRegistry(registry).getSplitToken(tokenId);
+        require(status != IM4mNFTRegistry.TokenStatus.Locked, 'token locked');
     }
 }
