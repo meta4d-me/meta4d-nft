@@ -10,6 +10,8 @@ import './interfaces/IM4mNFT.sol';
 import './interfaces/IM4mComponents.sol';
 import './interfaces/IM4mNFTRegistry.sol';
 
+import 'hardhat/console.sol';
+
 // @dev manage all kinds of components
 
 contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155HolderUpgradeable, IM4mNFTRegistry {
@@ -37,10 +39,10 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
     event ConvertToM4mNFT(address owner, IERC721 origin, uint tokenId, uint m4mTokenId);
     event Initialize(uint m4mTokenId, uint[] componentIds, uint[] amount);
     event Split(uint m4mTokenId, uint[] componentIds, uint[] amount);
-    event Assemble(uint m4mTokenId, uint[] componentIds, uint[] amount);
+    event Assemble(uint m4mTokenId, uint[] componentIds, ugitnt[] amount);
     event Redeem(address owner, IERC721 origin, uint tokenId, uint m4mTokenId);
 
-    function initialize(IM4mComponents _components, IM4mNFT _m4mNFT) public initializer {
+    function initialize(IM4mComponents _components, IM4mNFT _m4mNFT, IM4mDAO _dao) public initializer {
         __Ownable_init_unchained();
         __ERC721Holder_init_unchained();
         __ERC1155Holder_init_unchained();
@@ -48,6 +50,7 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
         components = _components;
         m4mNFT = _m4mNFT;
         operator = msg.sender;
+        dao = _dao;
     }
 
     function setOperator(address newOperator) public onlyOwner {
@@ -164,8 +167,8 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
         return (splitToken.status, splitToken.originalAttrHash);
     }
 
-    function getSplitTokenComponentAmount(uint componentId) public view returns (uint){
-        SplitToken storage splitToken = splitTokens[componentId];
+    function getSplitTokenComponentAmount(uint tokenId, uint componentId) public view returns (uint){
+        SplitToken storage splitToken = splitTokens[tokenId];
         return (splitToken.components[componentId]);
     }
 }

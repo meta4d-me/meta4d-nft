@@ -3,17 +3,19 @@ const deploy = require('../scripts/deploy');
 const env = require('../.env.json');
 
 describe("Split and Assemble", function () {
-    let nft, components, registry;
+    let simpleNFT, m4mNFT, components, registry;
     let owner;
     let operatorSigningKey;
     it('deploy', async function () {
         let deployments = await deploy.deploy();
-        nft = deployments.m4mNFT;
+        simpleNFT = deployments.simpleM4mNFT;
+        m4mNFT = deployments.m4mNFT;
         components = deployments.m4mComponent;
         registry = deployments.m4mNFTRegistry;
         [owner] = await ethers.getSigners();
         operatorSigningKey = new ethers.utils.SigningKey('0x' + env.PRIVATE_KEY_2);
         await registry.setOperator(ethers.utils.computeAddress(operatorSigningKey.publicKey));
+        await deployments.m4mDao.setConvertibleList(simpleNFT.address, true);
     });
     it('add new attribute value', async function () {
         await components.prepareNewToken(0, 'M4m 2D Style', '2D-STYLE');
@@ -40,48 +42,51 @@ describe("Split and Assemble", function () {
         await components.prepareNewToken(21, 'M4m Test1 FRONTEND_ENV', '2D-FRONTEND_ENV');
     });
     it('mint a NFT', async function () {
-        await nft.mint(owner.address);
-        expect(await nft.balanceOf(owner.address)).to.eq(1);
+        await simpleNFT.mint(owner.address, 'testetstetstsetstestsest');
+        expect(await simpleNFT.balanceOf(owner.address)).to.eq(1);
     });
     it('split', async function () {
-        await nft.setApprovalForAll(registry.address, true);
+        await simpleNFT.setApprovalForAll(registry.address, true);
         let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
         let hash = ethers.utils.solidityKeccak256(['bytes'],
             [ethers.utils.solidityPack(['uint[11]', 'uint[11]'], [componentIds, amounts])]);
         let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
-        await registry.splitM4mNFT(0, componentIds, amounts, sig);
-        expect(await nft.ownerOf(0)).to.eq(registry.address);
+        await registry.convertNFT(simpleNFT.address, 0, componentIds, amounts, sig);
+        expect(await m4mNFT.ownerOf(0)).to.eq(owner.address);
+        expect(await simpleNFT.ownerOf(0)).to.eq(registry.address);
         for (const id of componentIds) {
-            expect(await components.balanceOf(owner.address, id)).to.eq(1);
+            expect(await components.balanceOf(registry.address, id)).to.eq(1);
+            expect(await registry.getSplitTokenComponentAmount(0, id)).to.eq(1);
         }
+        const splitToken = await registry.getSplitToken(0);
+        expect(splitToken[0]).to.eq(1);
+        expect(splitToken[1]).to.eq(hash);
     });
-    it('assemble to new NFT', async function () {
+    it('split', async function () {
         await components.setApprovalForAll(registry.address, true);
-        let snapshot = await network.provider.send("evm_snapshot");
         let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
         let hash = ethers.utils.solidityKeccak256(['bytes'],
             [ethers.utils.solidityPack(['uint[11]', 'uint[11]'], [componentIds, amounts])]);
         let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
         await registry.assembleM4mNFT(componentIds, amounts, sig);
-        expect(await nft.ownerOf(1)).to.eq(owner.address);
+        expect(await m4mNFT.ownerOf(1)).to.eq(owner.address);
         for (const id of componentIds) {
             expect(await components.totalSupply(id)).to.eq(0);
         }
-        await network.provider.send("evm_revert", [snapshot]);
     });
-    it('assemble to original NFT', async function () {
-        let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-        let hash = ethers.utils.solidityKeccak256(['bytes'],
-            [ethers.utils.solidityPack(['uint[11]', 'uint[11]'], [componentIds, amounts])]);
-        let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
-        await registry.assembleOriginalM4mNFT(0, componentIds, amounts, sig);
-        expect(await nft.ownerOf(0)).to.eq(owner.address);
-        for (const id of componentIds) {
-            expect(await components.balanceOf(owner.address, id)).to.eq(0);
-            expect(await components.totalSupply(id)).to.eq(0);
-        }
-    });
+    // it('assemble to original NFT', async function () {
+    //     let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    //     let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+    //     let hash = ethers.utils.solidityKeccak256(['bytes'],
+    //         [ethers.utils.solidityPack(['uint[11]', 'uint[11]'], [componentIds, amounts])]);
+    //     let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
+    //     await registry.assembleOriginalM4mNFT(0, componentIds, amounts, sig);
+    //     expect(await m4mNFT.ownerOf(0)).to.eq(owner.address);
+    //     for (const id of componentIds) {
+    //         expect(await components.balanceOf(owner.address, id)).to.eq(0);
+    //         expect(await components.totalSupply(id)).to.eq(0);
+    //     }
+    // });
 })

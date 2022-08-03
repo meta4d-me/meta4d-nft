@@ -1,4 +1,3 @@
-const {expect} = require("chai");
 const {create} = require('ipfs-http-client');
 const ipfs = create({
     host: 'ipfs.infura.io',
