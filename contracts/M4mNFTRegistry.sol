@@ -72,7 +72,7 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
         require(splitToken.status == TokenStatus.NotExist, 'ill status');
         // check owner, not approval
         require(m4mNFT.ownerOf(tokenId) == msg.sender, 'ill owner');
-        bytes32 hash = keccak256(abi.encodePacked(componentIds, amounts));
+        bytes32 hash = keccak256(abi.encodePacked(tokenId, componentIds, amounts));
         require(SignatureCheckerUpgradeable.isValidSignatureNow(operator, hash, sig), 'ill sig');
 
         splitToken.status = TokenStatus.Initialized;
@@ -122,7 +122,7 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
         require(componentIds.length == amounts.length && amounts.length > 0, "ill params");
         SplitToken storage splitToken = splitTokens[m4mTokenId];
         require(splitToken.status == TokenStatus.Initialized, 'ill status');
-        bytes32 hash = keccak256(abi.encodePacked(componentIds, amounts));
+        bytes32 hash = keccak256(abi.encodePacked(m4mTokenId, componentIds, amounts));
         require(hash == splitToken.originalAttrHash, 'ill attrs');
         require(m4mNFT.ownerOf(tokenId) == msg.sender, 'ill owner');
 
