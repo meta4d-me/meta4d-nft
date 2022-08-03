@@ -14,6 +14,9 @@ contract M4mComponent is ERC1155Upgradeable, OwnableUpgradeable, IM4mComponents 
 
     address public override registry;
 
+    /* events */
+    event PreparedComponent(uint tokenId, string _name, string _symbol);
+
     function initialize(string memory uri, address _registry) public initializer {
         __ERC1155_init_unchained(uri);
         __Ownable_init_unchained();
@@ -26,6 +29,8 @@ contract M4mComponent is ERC1155Upgradeable, OwnableUpgradeable, IM4mComponents 
         require(totalSupply[tokenId] == 0, 'existed');
         name[tokenId] = _name;
         symbol[tokenId] = _symbol;
+
+        emit PreparedComponent(tokenId, _name, _symbol);
     }
 
     function burn(address account, uint256 id, uint256 value) public override {
