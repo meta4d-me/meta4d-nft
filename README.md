@@ -2,13 +2,15 @@
 
 ## deployments
 
+### mumbai
+
 ```json
 {
-  "m4mDAO": "0xF04FC8251f20C159eF52EDb944B642E95e79D472",
-  "m4mNFT": "0x2Ba99758e695c8e8d282Bc8970c43469ae25719c",
-  "m4mRegistry": "0x21b5d4F223716e1aA26DceAEfdC284f05a4f27Da",
-  "m4mComponent": "0x218f1D4046D46cbbF5A73F923DA6bC17A16F0167",
-  "simpleM4mNFT": "0xf093B9E2454a9BcFBC041F579646080C94EA3C21"
+  "m4mDAO": "0x38cd1db1b3eafee726f790470bd675d2d7850a86",
+  "m4mNFT": "0xba29d16b4488ec344ebd7e627df8c60b6b35f746",
+  "m4mRegistry": "0xb8c01243da1bdba77f02e2f805bfacc461020d47",
+  "m4mComponent": "0x8677edad1a9ef20e9a7420420e09d66e30c3e72a",
+  "simpleM4mNFT": "0xfb4cb4c5471956c9d7ea36a80bf299595cb2a06b"
 }
 ```
 
