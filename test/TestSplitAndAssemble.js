@@ -6,6 +6,8 @@ describe("Split and Assemble", function () {
     let simpleNFT, m4mNFT, components, registry;
     let owner;
     let operatorSigningKey;
+    let simpleNFTId = 0;
+    let m4mNFTId = 0;
     it('deploy', async function () {
         let deployments = await deploy.deploy();
         simpleNFT = deployments.simpleM4mNFT;
@@ -45,48 +47,152 @@ describe("Split and Assemble", function () {
         await simpleNFT.mint(owner.address, 'testetstetstsetstestsest');
         expect(await simpleNFT.balanceOf(owner.address)).to.eq(1);
     });
-    it('split', async function () {
+    it('init', async function () {
         await simpleNFT.setApprovalForAll(registry.address, true);
         let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
         let hash = ethers.utils.solidityKeccak256(['bytes'],
-            [ethers.utils.solidityPack(['uint[11]', 'uint[11]'], [componentIds, amounts])]);
+            [ethers.utils.solidityPack(['uint', 'uint[11]', 'uint[11]'], [m4mNFTId, componentIds, amounts])]);
         let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
-        await registry.convertNFT(simpleNFT.address, 0, componentIds, amounts, sig);
-        expect(await m4mNFT.ownerOf(0)).to.eq(owner.address);
-        expect(await simpleNFT.ownerOf(0)).to.eq(registry.address);
+        await registry.convertNFT(simpleNFT.address, simpleNFTId, componentIds, amounts, sig);
+        expect(await m4mNFT.ownerOf(m4mNFTId)).to.eq(owner.address);
+        expect(await simpleNFT.ownerOf(simpleNFTId)).to.eq(registry.address);
         for (const id of componentIds) {
+            expect(await components.totalSupply(id)).to.eq(1);
             expect(await components.balanceOf(registry.address, id)).to.eq(1);
-            expect(await registry.getSplitTokenComponentAmount(0, id)).to.eq(1);
+            expect(await registry.getTokenComponentAmount(m4mNFTId, id)).to.eq(1);
         }
-        const splitToken = await registry.getSplitToken(0);
-        expect(splitToken[0]).to.eq(1);
-        expect(splitToken[1]).to.eq(hash);
+        const tokenStatus = await registry.getTokenStatus(m4mNFTId);
+        expect(tokenStatus[0]).to.eq(1);
+        expect(tokenStatus[1]).to.eq(hash);
     });
     it('split', async function () {
         await components.setApprovalForAll(registry.address, true);
+        let componentIds = [0, 1, 2, 3, 4, 5];
+        let amounts = [1, 1, 1, 1, 1, 1];
+        await registry.splitM4mNFT(m4mNFTId, componentIds, amounts);
+        expect(await m4mNFT.ownerOf(m4mNFTId)).to.eq(owner.address);
+        expect(await simpleNFT.ownerOf(simpleNFTId)).to.eq(registry.address);
+        for (const id of componentIds) {
+            expect(await components.totalSupply(id)).to.eq(1);
+            expect(await components.balanceOf(registry.address, id)).to.eq(0);
+            expect(await components.balanceOf(owner.address, id)).to.eq(1);
+            expect(await registry.getTokenComponentAmount(m4mNFTId, id)).to.eq(0);
+        }
+        const tokenStatus = await registry.getTokenStatus(m4mNFTId);
+        expect(tokenStatus[0]).to.eq(1);
+    });
+    it('cannot split locked m4m-nft', async function () {
+        await registry.lock(m4mNFTId);
+        let tokenStatus = await registry.getTokenStatus(m4mNFTId);
+        expect(tokenStatus[0]).to.eq(2);
+
+        await components.setApprovalForAll(registry.address, true);
+        let componentIds = [6, 7, 8, 9, 10];
+        let amounts = [1, 1, 1, 1, 1];
+        await expect(registry.splitM4mNFT(m4mNFTId, componentIds, amounts)).to.be.revertedWith("ill status");
+
+        await registry.unlock(m4mNFTId);
+        tokenStatus = await registry.getTokenStatus(m4mNFTId);
+        expect(tokenStatus[0]).to.eq(1);
+    });
+    it('split again', async function () {
+        await components.setApprovalForAll(registry.address, true);
+        let componentIds = [6, 7, 8, 9, 10];
+        let amounts = [1, 1, 1, 1, 1];
+        await registry.splitM4mNFT(m4mNFTId, componentIds, amounts);
+        expect(await m4mNFT.ownerOf(m4mNFTId)).to.eq(owner.address);
+        expect(await simpleNFT.ownerOf(simpleNFTId)).to.eq(registry.address);
+        for (const id of componentIds) {
+            expect(await components.totalSupply(id)).to.eq(1);
+            expect(await components.balanceOf(registry.address, id)).to.eq(0);
+            expect(await components.balanceOf(owner.address, id)).to.eq(1);
+            expect(await registry.getTokenComponentAmount(m4mNFTId, id)).to.eq(0);
+        }
+        const tokenStatus = await registry.getTokenStatus(m4mNFTId);
+        expect(tokenStatus[0]).to.eq(1);
+    });
+    it('split failed', async function () {
+        await components.setApprovalForAll(registry.address, true);
+        let componentIds = [6, 7, 8, 9, 10];
+        let amounts = [1, 1, 1, 1, 1];
+        await expect(registry.splitM4mNFT(m4mNFTId, componentIds, amounts)).to.be.reverted;
+    });
+    it('assemble', async function () {
+        let componentIds = [0, 1];
+        let amounts = [1, 1];
+        await registry.assembleM4mNFT(m4mNFTId, componentIds, amounts);
+        expect(await m4mNFT.ownerOf(m4mNFTId)).to.eq(owner.address);
+        expect(await simpleNFT.ownerOf(simpleNFTId)).to.eq(registry.address);
+        for (const id of componentIds) {
+            expect(await components.totalSupply(id)).to.eq(1);
+            expect(await components.balanceOf(registry.address, id)).to.eq(1);
+            expect(await components.balanceOf(owner.address, id)).to.eq(0);
+            expect(await registry.getTokenComponentAmount(m4mNFTId, id)).to.eq(1);
+        }
+        const tokenStatus = await registry.getTokenStatus(m4mNFTId);
+        expect(tokenStatus[0]).to.eq(1);
+    });
+    it('cannot assemble locked m4m-nft', async function () {
+        await registry.lock(m4mNFTId);
+        let tokenStatus = await registry.getTokenStatus(m4mNFTId);
+        expect(tokenStatus[0]).to.eq(2);
+
+        await components.setApprovalForAll(registry.address, true);
+        let componentIds = [6, 7, 8, 9, 10];
+        let amounts = [1, 1, 1, 1, 1];
+        await expect(registry.assembleM4mNFT(m4mNFTId, componentIds, amounts)).to.be.revertedWith("ill status");
+
+        await registry.unlock(m4mNFTId);
+        tokenStatus = await registry.getTokenStatus(m4mNFTId);
+        expect(tokenStatus[0]).to.eq(1);
+    });
+    it('assemble again', async function () {
+        let componentIds = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+        let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1];
+        await registry.assembleM4mNFT(m4mNFTId, componentIds, amounts);
+        expect(await m4mNFT.ownerOf(m4mNFTId)).to.eq(owner.address);
+        expect(await simpleNFT.ownerOf(simpleNFTId)).to.eq(registry.address);
+        for (const id of componentIds) {
+            expect(await components.totalSupply(id)).to.eq(1);
+            expect(await components.balanceOf(registry.address, id)).to.eq(1);
+            expect(await components.balanceOf(owner.address, id)).to.eq(0);
+            expect(await registry.getTokenComponentAmount(m4mNFTId, id)).to.eq(1);
+        }
+        const tokenStatus = await registry.getTokenStatus(m4mNFTId);
+        expect(tokenStatus[0]).to.eq(1);
+    });
+    it('cannot transfer and redeem locked m4m-nft', async function () {
+        await registry.lock(m4mNFTId);
+        let tokenStatus = await registry.getTokenStatus(m4mNFTId);
+        expect(tokenStatus[0]).to.eq(2);
+
+        await expect(m4mNFT['safeTransferFrom(address,address,uint256)'](owner.address, owner.address, m4mNFTId))
+            .to.be.revertedWith("token locked");
+
         let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-        let hash = ethers.utils.solidityKeccak256(['bytes'],
-            [ethers.utils.solidityPack(['uint[11]', 'uint[11]'], [componentIds, amounts])]);
-        let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
-        await registry.assembleM4mNFT(componentIds, amounts, sig);
-        expect(await m4mNFT.ownerOf(1)).to.eq(owner.address);
+        await expect(registry.redeem(simpleNFT.address, simpleNFTId, m4mNFTId, componentIds, amounts))
+            .to.be.revertedWith("ill status");
+
+        await registry.unlock(m4mNFTId);
+        tokenStatus = await registry.getTokenStatus(m4mNFTId);
+        expect(tokenStatus[0]).to.eq(1);
+    });
+    it('redeem', async function () {
+        let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        await registry.redeem(simpleNFT.address, simpleNFTId, m4mNFTId, componentIds, amounts);
+        // m4mNFT is burned
+        // expect(await m4mNFT.ownerOf(m4mNFTId)).to.eq(owner.address);
+        expect(await simpleNFT.ownerOf(simpleNFTId)).to.eq(owner.address);
         for (const id of componentIds) {
             expect(await components.totalSupply(id)).to.eq(0);
+            expect(await components.balanceOf(registry.address, id)).to.eq(0);
+            expect(await components.balanceOf(owner.address, id)).to.eq(0);
+            expect(await registry.getTokenComponentAmount(m4mNFTId, id)).to.eq(0);
         }
+        const tokenStatus = await registry.getTokenStatus(m4mNFTId);
+        expect(tokenStatus[0]).to.eq(3);
     });
-    // it('assemble to original NFT', async function () {
-    //     let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    //     let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-    //     let hash = ethers.utils.solidityKeccak256(['bytes'],
-    //         [ethers.utils.solidityPack(['uint[11]', 'uint[11]'], [componentIds, amounts])]);
-    //     let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
-    //     await registry.assembleOriginalM4mNFT(0, componentIds, amounts, sig);
-    //     expect(await m4mNFT.ownerOf(0)).to.eq(owner.address);
-    //     for (const id of componentIds) {
-    //         expect(await components.balanceOf(owner.address, id)).to.eq(0);
-    //         expect(await components.totalSupply(id)).to.eq(0);
-    //     }
-    // });
 })

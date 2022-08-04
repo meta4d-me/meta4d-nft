@@ -15,9 +15,9 @@ interface IM4mNFTRegistry {
     function operator() external view returns (address);
 
     enum TokenStatus{NotExist, Initialized, Locked, Redeemed}
-    function getSplitToken(uint tokenId) external view returns (TokenStatus, bytes32);
+    function getTokenStatus(uint tokenId) external view returns (TokenStatus, bytes32);
 
-    function getSplitTokenComponentAmount(uint tokenId, uint componentId) external view returns (uint);
+    function getTokenComponentAmount(uint tokenId, uint componentId) external view returns (uint);
 
     /// @param m4mTokenId m4mTokenId
     /// @param user user
