@@ -15,6 +15,8 @@ async function deploy() {
     const simpleM4mNFT = await SimpleM4mNFT.deploy('Simple Meta-4d.me NFT', 'sM4M');
 
     await m4mNFTRegistry.initialize(m4mComponent.address, m4mNFT.address, m4mDao.address);
+    const [_, operator] = await ethers.getSigners()
+    await m4mNFTRegistry.setOperator(operator.address);
     return {m4mNFT, m4mDao, m4mNFTRegistry, m4mComponent, simpleM4mNFT};
 }
 
