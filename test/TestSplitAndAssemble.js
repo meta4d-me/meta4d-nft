@@ -18,6 +18,9 @@ describe("Split and Assemble", function () {
         operatorSigningKey = new ethers.utils.SigningKey('0x' + env.PRIVATE_KEY_2);
         await registry.setOperator(ethers.utils.computeAddress(operatorSigningKey.publicKey));
         await deployments.m4mDao.setConvertibleList(simpleNFT.address, true);
+        let hash = ethers.utils.solidityKeccak256(['bytes'],
+            [ethers.utils.solidityPack(['address', 'uint'], [simpleNFT.address, m4mNFTId])]);
+        m4mNFTId = ethers.BigNumber.from(hash);
     });
     it('add new attribute value', async function () {
         await components.prepareNewToken(0, 'M4m 2D Style', '2D-STYLE');
@@ -65,6 +68,8 @@ describe("Split and Assemble", function () {
         const tokenStatus = await registry.getTokenStatus(m4mNFTId);
         expect(tokenStatus[0]).to.eq(1);
         expect(tokenStatus[1]).to.eq(hash);
+        expect(tokenStatus[2]).to.eq(simpleNFT.address);
+        expect(tokenStatus[3]).to.eq(simpleNFTId);
     });
     it('split', async function () {
         await components.setApprovalForAll(registry.address, true);
@@ -172,7 +177,7 @@ describe("Split and Assemble", function () {
 
         let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-        await expect(registry.redeem(simpleNFT.address, simpleNFTId, m4mNFTId, componentIds, amounts))
+        await expect(registry.redeem(m4mNFTId, componentIds, amounts))
             .to.be.revertedWith("ill status");
 
         await registry.unlock(m4mNFTId);
@@ -182,7 +187,7 @@ describe("Split and Assemble", function () {
     it('redeem', async function () {
         let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-        await registry.redeem(simpleNFT.address, simpleNFTId, m4mNFTId, componentIds, amounts);
+        await registry.redeem(m4mNFTId, componentIds, amounts);
         // m4mNFT is burned
         // expect(await m4mNFT.ownerOf(m4mNFTId)).to.eq(owner.address);
         expect(await simpleNFT.ownerOf(simpleNFTId)).to.eq(owner.address);

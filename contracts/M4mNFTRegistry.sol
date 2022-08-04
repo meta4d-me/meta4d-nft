@@ -10,10 +10,6 @@ import './interfaces/IM4mNFT.sol';
 import './interfaces/IM4mComponents.sol';
 import './interfaces/IM4mNFTRegistry.sol';
 
-import 'hardhat/console.sol';
-
-// @dev manage all kinds of components
-
 contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155HolderUpgradeable, IM4mNFTRegistry {
 
     IM4mDAO public override dao;
@@ -26,21 +22,23 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
     address public operator;
 
     struct SplitToken {
+        IERC721 original;
+        uint originalTokenId;
+
         TokenStatus status;
         bytes32 originalAttrHash; // kecca256(abi.encodePacked(tokenIds, amounts))
         mapping(uint => uint) components; // component token id => amount
     }
 
     mapping(uint => SplitToken) public splitTokens;
-    mapping(uint => mapping(address => mapping(IERC721 => mapping(uint => bool)))) public override convertRecord;
 
     /* events */
     event SetOperator(address newOperator);
-    event ConvertToM4mNFT(address owner, IERC721 origin, uint tokenId, uint m4mTokenId);
+    event ConvertToM4mNFT(address owner, IERC721 original, uint originalTokenId, uint m4mTokenId);
     event Initialize(uint m4mTokenId, uint[] componentIds, uint[] amount);
     event Split(uint m4mTokenId, uint[] componentIds, uint[] amount);
     event Assemble(uint m4mTokenId, uint[] componentIds, uint[] amount);
-    event Redeem(address owner, IERC721 origin, uint tokenId, uint m4mTokenId);
+    event Redeem(address owner, IERC721 original, uint originalTokenId, uint m4mTokenId);
 
     function initialize(IM4mComponents _components, IM4mNFT _m4mNFT, IM4mDAO _dao) public initializer {
         __Ownable_init_unchained();
@@ -59,19 +57,22 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
     }
 
     /// @notice user convert original NFT to m4mNFT, and bind attributes
-    function convertNFT(IERC721 origin, uint originalTokenId, uint[]memory componentIds, uint[]memory amounts, bytes memory sig)
+    function convertNFT(IERC721 original, uint originalTokenId, uint[]memory componentIds, uint[]memory amounts, bytes memory sig)
     public override {
-        require(dao.convertibleList(origin), 'cannot convert');
-        origin.safeTransferFrom(msg.sender, address(this), originalTokenId);
-        uint m4mTokenId = m4mNFT.mint(msg.sender);
-        convertRecord[m4mTokenId][msg.sender][origin][originalTokenId] = true;
-        initializeM4mNFT(m4mTokenId, componentIds, amounts, sig);
-        emit ConvertToM4mNFT(msg.sender, origin, originalTokenId, m4mTokenId);
+        require(dao.convertibleList(original), 'cannot convert');
+        original.safeTransferFrom(msg.sender, address(this), originalTokenId);
+        uint m4mTokenId = uint(keccak256(abi.encodePacked(original, originalTokenId)));
+        m4mNFT.mint(msg.sender, m4mTokenId);
+        SplitToken storage splitToken = initializeM4mNFT(m4mTokenId, componentIds, amounts, sig);
+        splitToken.original = original;
+        splitToken.originalTokenId = originalTokenId;
+        emit ConvertToM4mNFT(msg.sender, original, originalTokenId, m4mTokenId);
     }
 
-    function initializeM4mNFT(uint m4mTokenId, uint[]memory componentIds, uint[]memory amounts, bytes memory sig) private {
+    function initializeM4mNFT(uint m4mTokenId, uint[]memory componentIds, uint[]memory amounts, bytes memory sig)
+    private returns (SplitToken storage splitToken){
         require(componentIds.length == amounts.length, "ill params");
-        SplitToken storage splitToken = splitTokens[m4mTokenId];
+        splitToken = splitTokens[m4mTokenId];
         require(splitToken.status == TokenStatus.NotExist, 'ill status');
         // check owner, not approval
         require(m4mNFT.ownerOf(m4mTokenId) == msg.sender, 'ill owner');
@@ -120,14 +121,13 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
         emit Assemble(m4mTokenId, componentIds, amounts);
     }
 
-    function redeem(IERC721 origin, uint tokenId, uint m4mTokenId, uint[]memory componentIds, uint[]memory amounts)
-    public override {
+    function redeem(uint m4mTokenId, uint[]memory componentIds, uint[]memory amounts) public override {
         require(componentIds.length == amounts.length && amounts.length > 0, "ill params");
         SplitToken storage splitToken = splitTokens[m4mTokenId];
         require(splitToken.status == TokenStatus.Initialized, 'ill status');
         bytes32 hash = keccak256(abi.encodePacked(m4mTokenId, componentIds, amounts));
         require(hash == splitToken.originalAttrHash, 'ill attrs');
-        require(m4mNFT.ownerOf(tokenId) == msg.sender, 'ill owner');
+        require(m4mNFT.ownerOf(m4mTokenId) == msg.sender, 'ill owner');
 
         /* burn components */
         for (uint i = 0; i < componentIds.length; i++) {
@@ -139,11 +139,9 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
         splitToken.status = TokenStatus.Redeemed;
 
         /* burn m4mNFT and redeem original nft */
-        require(convertRecord[m4mTokenId][msg.sender][origin][tokenId], 'no record');
-        origin.safeTransferFrom(address(this), msg.sender, tokenId);
-        m4mNFT.burn(tokenId);
-        convertRecord[m4mTokenId][msg.sender][origin][tokenId] = false;
-        emit Redeem(msg.sender, origin, tokenId, m4mTokenId);
+        splitToken.original.safeTransferFrom(address(this), msg.sender, splitToken.originalTokenId);
+        m4mNFT.burn(m4mTokenId);
+        emit Redeem(msg.sender, splitToken.original, splitToken.originalTokenId, m4mTokenId);
     }
 
     function lock(uint m4mTokenId) public override {
@@ -162,13 +160,22 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
         splitToken.status = TokenStatus.Initialized;
     }
 
-    function getTokenStatus(uint m4mTokenId) public view returns (TokenStatus, bytes32){
+    function getTokenStatus(uint m4mTokenId) public view returns (TokenStatus, bytes32, IERC721, uint){
         SplitToken storage splitToken = splitTokens[m4mTokenId];
-        return (splitToken.status, splitToken.originalAttrHash);
+        return (splitToken.status, splitToken.originalAttrHash, splitToken.original, splitToken.originalTokenId);
     }
 
     function getTokenComponentAmount(uint m4mTokenId, uint componentId) public view returns (uint){
         SplitToken storage splitToken = splitTokens[m4mTokenId];
         return (splitToken.components[componentId]);
+    }
+
+    function getTokenComponentAmounts(uint m4mTokenId, uint[] memory componentIds) external view returns (uint[] memory){
+        SplitToken storage splitToken = splitTokens[m4mTokenId];
+        uint[] memory result = new uint[](componentIds.length);
+        for (uint i = 0; i < componentIds.length; i++) {
+            result[i] = splitToken.components[componentIds[i]];
+        }
+        return result;
     }
 }

@@ -11,7 +11,6 @@ contract M4mNFT is ERC721EnumerableUpgradeable, IM4mNFT {
 
     string private baseURI;
     address public override registry;
-    uint private index;
 
     function initialize(string memory __baseURI, address _registry) public initializer {
         __ERC721Enumerable_init();
@@ -25,11 +24,9 @@ contract M4mNFT is ERC721EnumerableUpgradeable, IM4mNFT {
         _burn(tokenId);
     }
 
-    function mint(address to) public override returns (uint tokenId){
+    function mint(address to, uint tokenId) public override{
         require(msg.sender == registry, 'ill registry');
-        tokenId = index;
         _safeMint(to, tokenId);
-        index++;
     }
 
     function _baseURI() internal view override returns (string memory) {
@@ -42,7 +39,7 @@ contract M4mNFT is ERC721EnumerableUpgradeable, IM4mNFT {
         uint256 tokenId
     ) internal virtual override {
         super._beforeTokenTransfer(from, to, tokenId);
-        (IM4mNFTRegistry.TokenStatus status,) = IM4mNFTRegistry(registry).getTokenStatus(tokenId);
+        (IM4mNFTRegistry.TokenStatus status,,,) = IM4mNFTRegistry(registry).getTokenStatus(tokenId);
         require(status != IM4mNFTRegistry.TokenStatus.Locked, 'token locked');
     }
 }

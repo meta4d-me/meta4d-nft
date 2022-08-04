@@ -12,5 +12,6 @@ interface IM4mNFT is IERC721Upgradeable {
     function burn(uint256 tokenId) external;
 
     /// @notice mint a NFT with randomness attribute
-    function mint(address to) external returns (uint tokenId);
+    /// @notice only registry could mint, so that we can generate tokenInd off chain
+    function mint(address to, uint tokenId) external;
 }
