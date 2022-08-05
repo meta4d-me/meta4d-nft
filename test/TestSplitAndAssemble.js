@@ -19,7 +19,7 @@ describe("Split and Assemble", function () {
         await registry.setOperator(ethers.utils.computeAddress(operatorSigningKey.publicKey));
         await deployments.m4mDao.setConvertibleList(simpleNFT.address, true);
         let hash = ethers.utils.solidityKeccak256(['bytes'],
-            [ethers.utils.solidityPack(['address', 'uint'], [simpleNFT.address, m4mNFTId])]);
+            [ethers.utils.solidityPack(['address', 'uint'], [simpleNFT.address, simpleNFTId])]);
         m4mNFTId = ethers.BigNumber.from(hash);
     });
     it('add new attribute value', async function () {
@@ -184,20 +184,20 @@ describe("Split and Assemble", function () {
         tokenStatus = await registry.getTokenStatus(m4mNFTId);
         expect(tokenStatus[0]).to.eq(1);
     });
-    // it('redeem', async function () {
-    //     let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    //     let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-    //     await registry.redeem(m4mNFTId, componentIds, amounts);
-    //     // m4mNFT is burned
-    //     // expect(await m4mNFT.ownerOf(m4mNFTId)).to.eq(owner.address);
-    //     expect(await simpleNFT.ownerOf(simpleNFTId)).to.eq(owner.address);
-    //     for (const id of componentIds) {
-    //         expect(await components.totalSupply(id)).to.eq(0);
-    //         expect(await components.balanceOf(registry.address, id)).to.eq(0);
-    //         expect(await components.balanceOf(owner.address, id)).to.eq(0);
-    //         expect(await registry.getTokenComponentAmount(m4mNFTId, id)).to.eq(0);
-    //     }
-    //     const tokenStatus = await registry.getTokenStatus(m4mNFTId);
-    //     expect(tokenStatus[0]).to.eq(3);
-    // });
+    it('redeem', async function () {
+        let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        await registry.redeem(m4mNFTId, componentIds, amounts);
+        // m4mNFT is burned
+        // expect(await m4mNFT.ownerOf(m4mNFTId)).to.eq(owner.address);
+        expect(await simpleNFT.ownerOf(simpleNFTId)).to.eq(owner.address);
+        for (const id of componentIds) {
+            expect(await components.totalSupply(id)).to.eq(0);
+            expect(await components.balanceOf(registry.address, id)).to.eq(0);
+            expect(await components.balanceOf(owner.address, id)).to.eq(0);
+            expect(await registry.getTokenComponentAmount(m4mNFTId, id)).to.eq(0);
+        }
+        const tokenStatus = await registry.getTokenStatus(m4mNFTId);
+        expect(tokenStatus[0]).to.eq(3);
+    });
 })
