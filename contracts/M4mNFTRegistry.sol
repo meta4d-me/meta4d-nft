@@ -73,7 +73,7 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
     private returns (SplitToken storage splitToken){
         require(componentIds.length == amounts.length, "ill params");
         splitToken = splitTokens[m4mTokenId];
-        require(splitToken.status == TokenStatus.NotExist, 'ill status');
+        require(splitToken.status == TokenStatus.NotExist || splitToken.status == TokenStatus.Redeemed, 'ill status');
         // check owner, not approval
         require(m4mNFT.ownerOf(m4mTokenId) == msg.sender, 'ill owner');
         bytes32 hash = keccak256(abi.encodePacked(m4mTokenId, componentIds, amounts));

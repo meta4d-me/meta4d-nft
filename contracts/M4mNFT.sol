@@ -30,6 +30,11 @@ contract M4mNFT is ERC721EnumerableUpgradeable, IM4mNFT {
         _safeMint(to, tokenId);
     }
 
+    // TODO: only owner could update base uri at mainnet
+    function updateBaseURI(string memory uri) public {
+        baseURI = uri;
+    }
+
     function _baseURI() internal view override returns (string memory) {
         return string(abi.encodePacked(baseURI, uint(uint160(address(this))).toHexString(), "/"));
     }

@@ -4,7 +4,7 @@ async function main() {
     console.log("send M4mComponent upgrade tx");
 
     const M4mNFT = await ethers.getContractFactory('M4mNFT');
-    await upgrades.upgradeProxy('0xba29d16b4488ec344ebd7e627df8c60b6b35f746', M4mNFT);
+    await upgrades.upgradeProxy('0xfa860d48571fa0d19324cbde77e0fbdfdffb0a47', M4mNFT,{call:'initializeV2'});
     console.log("send M4mNFT upgrade tx");
 }
 
