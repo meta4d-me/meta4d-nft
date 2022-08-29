@@ -3,10 +3,12 @@ pragma solidity =0.8.12;
 
 import '@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
+import '@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol';
 
 import './interfaces/IM4mComponents.sol';
 
 contract M4mComponent is ERC1155Upgradeable, OwnableUpgradeable, IM4mComponents {
+    using StringsUpgradeable for uint256;
 
     mapping(uint => string) public override name;
     mapping(uint => string) public override symbol;
@@ -17,8 +19,8 @@ contract M4mComponent is ERC1155Upgradeable, OwnableUpgradeable, IM4mComponents 
     /* events */
     event PreparedComponent(uint tokenId, string _name, string _symbol);
 
-    function initialize(string memory uri, address _registry) public initializer {
-        __ERC1155_init_unchained(uri);
+    function initialize(address _registry) public initializer {
+        __ERC1155_init_unchained("");
         __Ownable_init_unchained();
         registry = _registry;
     }
@@ -67,5 +69,10 @@ contract M4mComponent is ERC1155Upgradeable, OwnableUpgradeable, IM4mComponents 
     function checkInit(uint tokenId) private view {
         string memory _name = name[tokenId];
         require(bytes(_name).length > 0, 'no attr');
+    }
+
+    function uri(uint256 id) public override view returns (string memory){
+        return string(abi.encodePacked("https://api.meta-4d.me/api/tokenuri/",
+            uint(uint160(address(this))).toHexString(), "/", id.toString()));
     }
 }
