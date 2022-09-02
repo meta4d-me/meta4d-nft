@@ -18,6 +18,8 @@ contract M4mComponent is ERC1155Upgradeable, OwnableUpgradeable, IM4mComponents 
 
     address public operator;
 
+    string public baseURI;
+
     /* events */
     event PreparedComponent(uint tokenId, string _name, string _symbol);
     event SetOperator(address newOperator);
@@ -80,9 +82,12 @@ contract M4mComponent is ERC1155Upgradeable, OwnableUpgradeable, IM4mComponents 
         require(bytes(_name).length > 0, 'no attr');
     }
 
-    // TODO: update base uri(should upgrade contract)
+    function setBaseURI(string memory base) public {
+        require(msg.sender == owner() || msg.sender == operator, 'ill caller');
+        baseURI = base;
+    }
+
     function uri(uint256 id) public override view returns (string memory){
-        return string(abi.encodePacked("https://api.meta-4d.me/api/tokenuri/",
-            uint(uint160(address(this))).toHexString(), "/", id.toString()));
+        return string(abi.encodePacked(baseURI, uint(uint160(address(this))).toHexString(), "/", id.toString()));
     }
 }
