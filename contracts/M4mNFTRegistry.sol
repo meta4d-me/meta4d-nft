@@ -36,6 +36,7 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
     event SetOperator(address newOperator);
     event ConvertToM4mNFT(address owner, IERC721 original, uint originalTokenId, uint m4mTokenId);
     event Initialize(uint m4mTokenId, uint[] componentIds, uint[] amount);
+    event ClaimedLoot(address owner, uint[] componentIds, uint[] amount);
     event Split(uint m4mTokenId, uint[] componentIds, uint[] amount);
     event Assemble(uint m4mTokenId, uint[] componentIds, uint[] amount);
     event Redeem(address owner, IERC721 original, uint originalTokenId, uint m4mTokenId);
@@ -142,6 +143,14 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
         splitToken.original.safeTransferFrom(address(this), msg.sender, splitToken.originalTokenId);
         m4mNFT.burn(m4mTokenId);
         emit Redeem(msg.sender, splitToken.original, splitToken.originalTokenId, m4mTokenId);
+    }
+
+    function claimLoot(uint[]memory componentIds, uint[]memory amounts, bytes memory sig) public override {
+        require(componentIds.length == amounts.length, 'ill param');
+        bytes32 hash = keccak256(abi.encodePacked(msg.sender, componentIds, amounts));
+        require(SignatureCheckerUpgradeable.isValidSignatureNow(operator, hash, sig), 'ill sig');
+        components.mintBatch(msg.sender, componentIds, amounts);
+        emit ClaimedLoot(msg.sender, componentIds, amounts);
     }
 
     function lock(uint m4mTokenId) public override {
