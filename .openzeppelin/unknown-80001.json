@@ -2529,7 +2529,7 @@
             "label": "dao",
             "offset": 0,
             "slot": "301",
-            "type": "t_contract(IM4mDAO)7774",
+            "type": "t_contract(IM4mDAO)7844",
             "contract": "M4mNFTRegistry",
             "src": "contracts/M4mNFTRegistry.sol:15"
           },
@@ -2537,7 +2537,7 @@
             "label": "m4mNFT",
             "offset": 0,
             "slot": "302",
-            "type": "t_contract(IM4mNFT)7799",
+            "type": "t_contract(IM4mNFT)7869",
             "contract": "M4mNFTRegistry",
             "src": "contracts/M4mNFTRegistry.sol:18"
           },
@@ -2545,7 +2545,7 @@
             "label": "components",
             "offset": 0,
             "slot": "303",
-            "type": "t_contract(IM4mComponents)7754",
+            "type": "t_contract(IM4mComponents)7824",
             "contract": "M4mNFTRegistry",
             "src": "contracts/M4mNFTRegistry.sol:20"
           },
@@ -2561,7 +2561,7 @@
             "label": "splitTokens",
             "offset": 0,
             "slot": "305",
-            "type": "t_mapping(t_uint256,t_struct(SplitToken)6650_storage)",
+            "type": "t_mapping(t_uint256,t_struct(SplitToken)6720_storage)",
             "contract": "M4mNFTRegistry",
             "src": "contracts/M4mNFTRegistry.sol:33"
           }
@@ -2591,19 +2591,19 @@
             "label": "contract IERC721",
             "numberOfBytes": "20"
           },
-          "t_contract(IM4mComponents)7754": {
+          "t_contract(IM4mComponents)7824": {
             "label": "contract IM4mComponents",
             "numberOfBytes": "20"
           },
-          "t_contract(IM4mDAO)7774": {
+          "t_contract(IM4mDAO)7844": {
             "label": "contract IM4mDAO",
             "numberOfBytes": "20"
           },
-          "t_contract(IM4mNFT)7799": {
+          "t_contract(IM4mNFT)7869": {
             "label": "contract IM4mNFT",
             "numberOfBytes": "20"
           },
-          "t_enum(TokenStatus)7831": {
+          "t_enum(TokenStatus)7901": {
             "label": "enum IM4mNFTRegistry.TokenStatus",
             "members": [
               "NotExist",
@@ -2613,7 +2613,7 @@
             ],
             "numberOfBytes": "1"
           },
-          "t_mapping(t_uint256,t_struct(SplitToken)6650_storage)": {
+          "t_mapping(t_uint256,t_struct(SplitToken)6720_storage)": {
             "label": "mapping(uint256 => struct M4mNFTRegistry.SplitToken)",
             "numberOfBytes": "32"
           },
@@ -2621,7 +2621,7 @@
             "label": "mapping(uint256 => uint256)",
             "numberOfBytes": "32"
           },
-          "t_struct(SplitToken)6650_storage": {
+          "t_struct(SplitToken)6720_storage": {
             "label": "struct M4mNFTRegistry.SplitToken",
             "members": [
               {
@@ -2638,7 +2638,7 @@
               },
               {
                 "label": "status",
-                "type": "t_enum(TokenStatus)7831",
+                "type": "t_enum(TokenStatus)7901",
                 "offset": 0,
                 "slot": "2"
               },
@@ -3610,6 +3610,462 @@
           "t_string_storage": {
             "label": "string",
             "numberOfBytes": "32"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        }
+      }
+    },
+    "a8cceccb8b72fed1e066ce3f21b9b3057cb61a36c14c91dc2984ec788610a0c9": {
+      "address": "0x84c5e9C5a4d07b4515340F46951036264135FaF1",
+      "txHash": "0xd4149c918704f97d20ac7e4193a6fbd648c0e31533ce2a1299ed3357425e51ba",
+      "layout": {
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:87"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC721HolderUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol:40"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1155ReceiverUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155ReceiverUpgradeable.sol:31"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1155HolderUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol:48"
+          },
+          {
+            "label": "dao",
+            "offset": 0,
+            "slot": "301",
+            "type": "t_contract(IM4mDAO)7929",
+            "contract": "M4mNFTRegistry",
+            "src": "contracts/M4mNFTRegistry.sol:15"
+          },
+          {
+            "label": "m4mNFT",
+            "offset": 0,
+            "slot": "302",
+            "type": "t_contract(IM4mNFT)7954",
+            "contract": "M4mNFTRegistry",
+            "src": "contracts/M4mNFTRegistry.sol:18"
+          },
+          {
+            "label": "components",
+            "offset": 0,
+            "slot": "303",
+            "type": "t_contract(IM4mComponents)7909",
+            "contract": "M4mNFTRegistry",
+            "src": "contracts/M4mNFTRegistry.sol:20"
+          },
+          {
+            "label": "operator",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_address",
+            "contract": "M4mNFTRegistry",
+            "src": "contracts/M4mNFTRegistry.sol:22"
+          },
+          {
+            "label": "splitTokens",
+            "offset": 0,
+            "slot": "305",
+            "type": "t_mapping(t_uint256,t_struct(SplitToken)6720_storage)",
+            "contract": "M4mNFTRegistry",
+            "src": "contracts/M4mNFTRegistry.sol:33"
+          },
+          {
+            "label": "claimedLoot",
+            "offset": 0,
+            "slot": "306",
+            "type": "t_mapping(t_bytes32,t_bool)",
+            "contract": "M4mNFTRegistry",
+            "src": "contracts/M4mNFTRegistry.sol:35"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IERC721)5085": {
+            "label": "contract IERC721",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IM4mComponents)7909": {
+            "label": "contract IM4mComponents",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IM4mDAO)7929": {
+            "label": "contract IM4mDAO",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IM4mNFT)7954": {
+            "label": "contract IM4mNFT",
+            "numberOfBytes": "20"
+          },
+          "t_enum(TokenStatus)7986": {
+            "label": "enum IM4mNFTRegistry.TokenStatus",
+            "members": [
+              "NotExist",
+              "Initialized",
+              "Locked",
+              "Redeemed"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_bytes32,t_bool)": {
+            "label": "mapping(bytes32 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(SplitToken)6720_storage)": {
+            "label": "mapping(uint256 => struct M4mNFTRegistry.SplitToken)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(SplitToken)6720_storage": {
+            "label": "struct M4mNFTRegistry.SplitToken",
+            "members": [
+              {
+                "label": "original",
+                "type": "t_contract(IERC721)5085",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "originalTokenId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "status",
+                "type": "t_enum(TokenStatus)7986",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "originalAttrHash",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "components",
+                "type": "t_mapping(t_uint256,t_uint256)",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          }
+        }
+      }
+    },
+    "7580b3fb55892d593daa72ab430bac9a7da17106675d8c466b00ac539469bc3c": {
+      "address": "0x415b361eC42105Fbdb996688155DC12782082a7E",
+      "txHash": "0x9d0aed2151eb923a03e92083bc4147264ee611d907d6406d345d7605a3e57344",
+      "layout": {
+        "storage": [
+          {
+            "label": "_initialized",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "label": "_initializing",
+            "offset": 1,
+            "slot": "0",
+            "type": "t_bool",
+            "contract": "Initializable",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ContextUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:36"
+          },
+          {
+            "label": "_owner",
+            "offset": 0,
+            "slot": "51",
+            "type": "t_address",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "52",
+            "type": "t_array(t_uint256)49_storage",
+            "contract": "OwnableUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:87"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "101",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC721HolderUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC721/utils/ERC721HolderUpgradeable.sol:40"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "151",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC165Upgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:41"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "201",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1155ReceiverUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155ReceiverUpgradeable.sol:31"
+          },
+          {
+            "label": "__gap",
+            "offset": 0,
+            "slot": "251",
+            "type": "t_array(t_uint256)50_storage",
+            "contract": "ERC1155HolderUpgradeable",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpgradeable.sol:48"
+          },
+          {
+            "label": "dao",
+            "offset": 0,
+            "slot": "301",
+            "type": "t_contract(IM4mDAO)7935",
+            "contract": "M4mNFTRegistry",
+            "src": "contracts/M4mNFTRegistry.sol:15"
+          },
+          {
+            "label": "m4mNFT",
+            "offset": 0,
+            "slot": "302",
+            "type": "t_contract(IM4mNFT)7960",
+            "contract": "M4mNFTRegistry",
+            "src": "contracts/M4mNFTRegistry.sol:18"
+          },
+          {
+            "label": "components",
+            "offset": 0,
+            "slot": "303",
+            "type": "t_contract(IM4mComponents)7915",
+            "contract": "M4mNFTRegistry",
+            "src": "contracts/M4mNFTRegistry.sol:20"
+          },
+          {
+            "label": "operator",
+            "offset": 0,
+            "slot": "304",
+            "type": "t_address",
+            "contract": "M4mNFTRegistry",
+            "src": "contracts/M4mNFTRegistry.sol:22"
+          },
+          {
+            "label": "splitTokens",
+            "offset": 0,
+            "slot": "305",
+            "type": "t_mapping(t_uint256,t_struct(SplitToken)6720_storage)",
+            "contract": "M4mNFTRegistry",
+            "src": "contracts/M4mNFTRegistry.sol:33"
+          },
+          {
+            "label": "claimedLoot",
+            "offset": 0,
+            "slot": "306",
+            "type": "t_mapping(t_bytes32,t_bool)",
+            "contract": "M4mNFTRegistry",
+            "src": "contracts/M4mNFTRegistry.sol:35"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]",
+            "numberOfBytes": "1568"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]",
+            "numberOfBytes": "1600"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_bytes32": {
+            "label": "bytes32",
+            "numberOfBytes": "32"
+          },
+          "t_contract(IERC721)5085": {
+            "label": "contract IERC721",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IM4mComponents)7915": {
+            "label": "contract IM4mComponents",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IM4mDAO)7935": {
+            "label": "contract IM4mDAO",
+            "numberOfBytes": "20"
+          },
+          "t_contract(IM4mNFT)7960": {
+            "label": "contract IM4mNFT",
+            "numberOfBytes": "20"
+          },
+          "t_enum(TokenStatus)7992": {
+            "label": "enum IM4mNFTRegistry.TokenStatus",
+            "members": [
+              "NotExist",
+              "Initialized",
+              "Locked",
+              "Redeemed"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_bytes32,t_bool)": {
+            "label": "mapping(bytes32 => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(SplitToken)6720_storage)": {
+            "label": "mapping(uint256 => struct M4mNFTRegistry.SplitToken)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)",
+            "numberOfBytes": "32"
+          },
+          "t_struct(SplitToken)6720_storage": {
+            "label": "struct M4mNFTRegistry.SplitToken",
+            "members": [
+              {
+                "label": "original",
+                "type": "t_contract(IERC721)5085",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "originalTokenId",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "status",
+                "type": "t_enum(TokenStatus)7992",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "originalAttrHash",
+                "type": "t_bytes32",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "components",
+                "type": "t_mapping(t_uint256,t_uint256)",
+                "offset": 0,
+                "slot": "4"
+              }
+            ],
+            "numberOfBytes": "160"
           },
           "t_uint256": {
             "label": "uint256",

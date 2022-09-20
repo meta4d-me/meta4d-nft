@@ -153,6 +153,7 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
         require(!claimedLoot[hash], 'already claimed');
         require(SignatureCheckerUpgradeable.isValidSignatureNow(operator, hash, sig), 'ill sig');
         components.mintBatch(msg.sender, componentIds, amounts);
+        claimedLoot[hash] = true;
         emit ClaimedLoot(msg.sender, componentIds, amounts);
     }
 
