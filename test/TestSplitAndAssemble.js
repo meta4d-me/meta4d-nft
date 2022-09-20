@@ -200,4 +200,16 @@ describe("Split and Assemble", function () {
         const tokenStatus = await registry.getTokenStatus(m4mNFTId);
         expect(tokenStatus[0]).to.eq(3);
     });
+    it('test claim loot', async function () {
+        let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        let hash = ethers.utils.solidityKeccak256(['bytes'],
+            [ethers.utils.solidityPack(['address', 'uint[11]', 'uint[11]'], [owner.address, componentIds, amounts])]);
+        let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
+        await registry.claimLoot(componentIds, amounts, sig);
+        for (const id of componentIds) {
+            expect(await components.totalSupply(id)).to.eq(1);
+            expect(await components.balanceOf(owner.address, id)).to.eq(1);
+        }
+    });
 })

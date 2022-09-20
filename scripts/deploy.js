@@ -12,7 +12,7 @@ async function deploy() {
     console.log("send M4mDao deploy tx", m4mDao.deployTransaction.hash);
 
     const M4mComponent = await ethers.getContractFactory('M4mComponent');
-    const m4mComponent = await upgrades.deployProxy(M4mComponent, ['ipfs://test/', m4mNFTRegistry.address]);
+    const m4mComponent = await upgrades.deployProxy(M4mComponent, [m4mNFTRegistry.address]);
     console.log("send M4mComponent deploy tx", m4mComponent.deployTransaction.hash);
 
     const SimpleM4mNFT = await ethers.getContractFactory('SimpleM4mNFT');

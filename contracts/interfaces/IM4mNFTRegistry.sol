@@ -29,6 +29,8 @@ interface IM4mNFTRegistry {
 
     function redeem(uint m4mTokenId, uint[]memory componentIds, uint[]memory amounts) external;
 
+    function claimLoot(uint[]memory componentIds, uint[]memory amounts, bytes memory sig) external;
+
     function lock(uint tokenId) external;
 
     function unlock(uint tokenId) external;
