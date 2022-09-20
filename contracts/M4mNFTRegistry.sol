@@ -32,6 +32,8 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
 
     mapping(uint => SplitToken) public splitTokens;
 
+    mapping(bytes32 => bool) public claimedLoot;
+
     /* events */
     event SetOperator(address newOperator);
     event ConvertToM4mNFT(address owner, IERC721 original, uint originalTokenId, uint m4mTokenId);
@@ -145,9 +147,10 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
         emit Redeem(msg.sender, splitToken.original, splitToken.originalTokenId, m4mTokenId);
     }
 
-    function claimLoot(uint[]memory componentIds, uint[]memory amounts, bytes memory sig) public override {
+    function claimLoot(string memory uuid, uint[]memory componentIds, uint[]memory amounts, bytes memory sig) public override {
         require(componentIds.length == amounts.length, 'ill param');
-        bytes32 hash = keccak256(abi.encodePacked(msg.sender, componentIds, amounts));
+        bytes32 hash = keccak256(abi.encodePacked(msg.sender, uuid, componentIds, amounts));
+        require(!claimedLoot[hash], 'already claimed');
         require(SignatureCheckerUpgradeable.isValidSignatureNow(operator, hash, sig), 'ill sig');
         components.mintBatch(msg.sender, componentIds, amounts);
         emit ClaimedLoot(msg.sender, componentIds, amounts);

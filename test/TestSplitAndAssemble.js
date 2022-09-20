@@ -203,10 +203,12 @@ describe("Split and Assemble", function () {
     it('test claim loot', async function () {
         let componentIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
         let amounts = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        let uuid = "123123";
         let hash = ethers.utils.solidityKeccak256(['bytes'],
-            [ethers.utils.solidityPack(['address', 'uint[11]', 'uint[11]'], [owner.address, componentIds, amounts])]);
+            [ethers.utils.solidityPack(['address', 'string', 'uint[11]', 'uint[11]'],
+                [owner.address, uuid, componentIds, amounts])]);
         let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
-        await registry.claimLoot(componentIds, amounts, sig);
+        await registry.claimLoot(uuid, componentIds, amounts, sig);
         for (const id of componentIds) {
             expect(await components.totalSupply(id)).to.eq(1);
             expect(await components.balanceOf(owner.address, id)).to.eq(1);
