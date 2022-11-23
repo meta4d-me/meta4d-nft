@@ -66,3 +66,34 @@ m4mRegistry.convertNFT(original_addr, original_token_id, componentIds, component
 // return amounts of component specified by componentIds
     function getTokenComponentAmounts(uint m4mTokenId, uint[] memory componentIds) external view returns (uint[] memory);
 ```
+
+## Set URI of specified version
+
+```solidity
+struct Token {
+    uint chainId;
+    address nft;
+    uint tokenId;
+}
+
+function setInfo(Token memory token, string memory uri) external;
+```
+
+Set uri for specified token. Note that one msg. sender can only set one version of URI. If it is set multiple times,
+only the latest URI will be retained
+
+## Get URI of specified version
+
+```solidity
+function getInfo(Token memory token, address creator) external view returns (string memory);
+```
+
+return the URI set by msg.sender.
+
+## Get all URI info
+
+```solidity
+function getLatestInfoAll(Token memory token) external view returns (address[] memory creators, string[] memory uris);
+```
+
+Returns all URIs set by all msg.senders.
