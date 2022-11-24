@@ -76,7 +76,7 @@ struct Token {
     uint tokenId;
 }
 
-function setInfo(Token memory token, string memory uri) external;
+    function setInfo(Token memory token, string memory uri) external;
 ```
 
 Set uri for specified token. Note that one msg. sender can only set one version of URI. If it is set multiple times,
@@ -97,3 +97,25 @@ function getLatestInfoAll(Token memory token) external view returns (address[] m
 ```
 
 Returns all URIs set by all msg.senders.
+
+## Zip mint M4M-NFT
+
+```solidity
+function mintM4mNFT(address owner, uint[]memory componentIds, uint[]memory amounts, bytes memory sig) external;
+```
+
+zip mint simple m4m nft and convert simple to M4M nft at one transaction.
+
+### Usage
+
+```js
+let SimpleM4mNFT = await ethers.getContractFactory('SimpleM4mNFT')
+let simpleM4mNFT = await SimpleM4mNFT.attach('0x1a8a1dfd9063eae42a2b8339966fbea388430ca4');
+let tokenId = await simpleM4mNFT.tokenIndex();
+// request to m4m backend to get convert params
+let resp = await request(`/api/v1/m4m-nft/initialization?original_addr=${simpleM4mNFT.address}&&original_token_id=${tokenId.toString()}&&chain_name=mumbai`);
+let Zip = await ethers.getContractFactory('Zip');
+let zip = await Zip.attach('0x3eb8c78d907342bd216ee122b8fcb9ca6bad4bfb');
+// mint M4M-NFT to `to` address
+await zip.mintM4mNFT(to, resp.component_ids, resp.component_nums, resp.sig);
+```
