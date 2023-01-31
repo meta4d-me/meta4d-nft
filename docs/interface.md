@@ -98,7 +98,9 @@ function getLatestInfoAll(Token memory token) external view returns (address[] m
 
 Returns all URIs set by all msg.senders.
 
-## Zip mint M4M-NFT
+## Zip
+
+### mint M4M-NFT
 
 ```solidity
 function mintM4mNFT(address owner, uint[]memory componentIds, uint[]memory amounts, bytes memory sig) external;
@@ -106,7 +108,7 @@ function mintM4mNFT(address owner, uint[]memory componentIds, uint[]memory amoun
 
 zip mint simple m4m nft and convert simple to M4M nft at one transaction.
 
-### Usage
+#### Usage
 
 ```js
 let SimpleM4mNFT = await ethers.getContractFactory('SimpleM4mNFT')
@@ -118,4 +120,49 @@ let Zip = await ethers.getContractFactory('Zip');
 let zip = await Zip.attach('0x3eb8c78d907342bd216ee122b8fcb9ca6bad4bfb');
 // mint M4M-NFT to `to` address
 await zip.mintM4mNFT(to, resp.component_ids, resp.component_nums, resp.sig);
+```
+
+### change components
+
+```solidity
+function changeComponents(uint m4mTokenId, uint[]memory outComponentIds, uint[]memory outAmounts,
+    uint[]memory inComponentIds, uint[]memory inAmounts) external;
+```
+
+zip split and assemble M4M nft at one transaction.
+
+#### Usage
+
+```js
+// set M4M NFT and M4MComponent approval to zip contract
+await m4mNFT.setApprovalForAll(zip.address, true);
+await components.setApprovalForAll(zip.address, true);
+let outComponentIds = [1, 2, 3];
+let outAmounts = [1, 1, 1];
+let inComponentIds = [11, 12, 13];
+let inAmounts = [1, 1, 1];
+await zip.changeComponents(m4mNFTId, outComponentIds, outAmounts, inComponentIds, inAmounts);
+```
+
+### change components and record old version
+
+```solidity
+function changeComponentsAndRecordVersion(uint m4mTokenId, uint[]memory outComponentIds, uint[]memory outAmounts,
+    uint[]memory inComponentIds, uint[]memory inAmounts, string memory oldVersion) external;
+```
+
+zip split and assemble M4M nft at one transaction.
+
+#### Usage
+
+```js
+// set M4M NFT and M4MComponent approval to zip contract
+await m4mNFT.setApprovalForAll(zip.address, true);
+await components.setApprovalForAll(zip.address, true);
+let outComponentIds = [1, 2, 3];
+let outAmounts = [1, 1, 1];
+let inComponentIds = [11, 12, 13];
+let inAmounts = [1, 1, 1];
+let oldVersion = "ipfs://oldoldoldoldold"
+await zip.changeComponentsAndRecordVersion(m4mNFTId, outComponentIds, outAmounts, inComponentIds, inAmounts,oldVersion);
 ```
