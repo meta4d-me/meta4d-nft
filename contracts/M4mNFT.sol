@@ -42,9 +42,10 @@ contract M4mNFT is ERC721EnumerableUpgradeable, IM4mNFT {
     function _beforeTokenTransfer(
         address from,
         address to,
-        uint256 tokenId
+        uint256 tokenId,
+        uint256 batchSize
     ) internal virtual override {
-        super._beforeTokenTransfer(from, to, tokenId);
+        super._beforeTokenTransfer(from, to, tokenId, batchSize);
         (IM4mNFTRegistry.TokenStatus status,,,) = IM4mNFTRegistry(registry).getTokenStatus(tokenId);
         require(status != IM4mNFTRegistry.TokenStatus.Locked, 'token locked');
     }

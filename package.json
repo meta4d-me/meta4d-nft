@@ -32,8 +32,8 @@
     "typechain": "^7.0.0"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.1.0",
-    "@openzeppelin/contracts-upgradeable": "^4.1.0",
+    "@openzeppelin/contracts": "^4.8.1",
+    "@openzeppelin/contracts-upgradeable": "^4.8.1",
     "ipfs-http-client": "^56.0.3"
   }
 }
