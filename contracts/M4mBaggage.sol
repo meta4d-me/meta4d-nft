@@ -12,7 +12,7 @@ import './interfaces/IM4mComponents.sol';
 import './interfaces/IM4mNFTRegistryV2.sol';
 
 /// @notice store gaming prop, manage game operator
-contract M4mBaggage is IM4mBaggage, OwnableUpgradeable {
+contract M4mBaggage is IM4mBaggage, OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155HolderUpgradeable {
 
     IM4mNFTRegistryV2 public registry;
 
@@ -25,12 +25,15 @@ contract M4mBaggage is IM4mBaggage, OwnableUpgradeable {
     mapping(bytes32 => bool) internal _isGameSettled;
 
     function initialize(IM4mNFTRegistryV2 reg) public initializer {
-        __Ownable_init();
+        __Ownable_init_unchained();
+        __ERC721Holder_init_unchained();
+        __ERC1155Holder_init_unchained();
 
         registry = reg;
+        reg.components().setApprovalForAll(address(reg), true);
     }
 
-    function setGameOperator(uint gameId, address gameSigner, address operator) public onlyOwner {
+    function setGameSignerAndOperator(uint gameId, address gameSigner, address operator) public onlyOwner {
         require(getGameOwner[gameId].operator == address(0), 'only once');
         require(operator != address(0) && gameSigner != address(0), 'ill op/signer');
         getGameOwner[gameId] = GameOwner(gameSigner, operator);
@@ -63,7 +66,7 @@ contract M4mBaggage is IM4mBaggage, OwnableUpgradeable {
         registry.assembleM4mNFT(m4mTokenId, inComponentIds, inAmounts);
         // lock m4m nft
         registry.lock(m4mTokenId);
-        LockedNFT memory info = LockedNFT(msg.sender, gameId, keccak256(bytes(uuid)));
+        LockedNFT memory info = LockedNFT(msg.sender, gameId, uuid);
         lockedNFTs[m4mTokenId] = info;
         emit GameBegin(m4mTokenId, info);
     }

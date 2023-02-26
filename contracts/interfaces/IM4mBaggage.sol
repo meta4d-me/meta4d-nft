@@ -11,7 +11,7 @@ interface IM4mBaggage {
     struct LockedNFT {
         address owner;
         uint gameId; // which game
-        bytes32 uuid; // which round of game
+        string uuid; // which round of game
     }
 
     event OperatorUpdated(uint gameId, address operator);
@@ -20,7 +20,7 @@ interface IM4mBaggage {
     event GameSettled(uint m4mTokenId, LockedNFT info);
 
     /// @notice could only set once
-    function setGameOperator(uint gameId, address gameSigner, address operator) external;
+    function setGameSignerAndOperator(uint gameId, address gameSigner, address operator) external;
 
     /// @notice only old operator of gameId could transfer to new operator
     function transferOperator(uint gameId, address newOperator) external;

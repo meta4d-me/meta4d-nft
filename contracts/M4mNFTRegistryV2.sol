@@ -8,7 +8,7 @@ contract M4mNFTRegistryV2 is M4mNFTRegistry, IM4mNFTRegistryV2 {
 
     address public override m4mBaggage;
 
-    function initialize(address baggage) public reinitializer(2) {
+    function initializeV2(address baggage) public reinitializer(2) {
         m4mBaggage = baggage;
     }
 
