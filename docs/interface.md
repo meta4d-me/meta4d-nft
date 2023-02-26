@@ -166,3 +166,40 @@ let inAmounts = [1, 1, 1];
 let oldVersion = "ipfs://oldoldoldoldold"
 await zip.changeComponentsAndRecordVersion(m4mNFTId, outComponentIds, outAmounts, inComponentIds, inAmounts,oldVersion);
 ```
+
+
+## Baggage
+
+Refer [interface](../contracts/interfaces/IM4mBaggage.sol) and [case](../test/TestBaggage.js)
+
+### game begin
+
+```solidity
+function gameBegin(uint gameId, string memory uuid, uint m4mTokenId, uint[] memory inComponentIds, uint[] memory inAmounts) external;
+```
+
+- gameId: identification of game
+- uuid: unique id of each round of each game
+- m4mTokenId: token id of M4M-NFT
+- inComponents: used components, transfer into baggage and locked into M4M-NFT
+- inAmounts: the amounts of corresponding inComponents;
+
+
+### game end
+
+settle use state after game end.
+
+```solidity
+function gameEnd(uint m4mTokenId,
+    uint[] memory lootIds, uint[] memory lootAmounts,
+    uint[] memory lostIds, uint[] memory lostAmounts,
+    bytes memory operatorSig, bytes memory gameSignerSig) external;
+```
+
+- m4mTokenId: token id of M4M-NFT
+- lootIds: the components that rewarded by users
+- lootAmounts: the amounts of corresponding lootIds
+- lostIds: the components that lost by users
+- lostAmounts: the amounts of corresponding lostIds
+- operatorSig: sig of game operator, generated method is [here](../test/TestBaggage.js#L91)
+- gameSignerSig: sig of game signer, generated method is [here](../test/TestBaggage.js#L92)
