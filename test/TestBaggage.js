@@ -121,5 +121,7 @@ describe("Test Baggage", function () {
         // game is settled
         expect(await m4mBaggage.isGameSettled(owner.address, m4mNFTId, gameId, info.uuid));
     });
-
+    it('could set operator and signer only once', async function(){
+        await expect(m4mBaggage.setGameSignerAndOperator(gameId, gameSignerAddr, gameOperatorAddr)).to.revertedWith('only once');
+    })
 });
