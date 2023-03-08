@@ -3,7 +3,7 @@ const deploy = require('../scripts/deploy');
 const env = require("../.env.json");
 
 describe("Test Zip", function () {
-    let simpleNFT, m4mNFT, components, registry, versionManager;
+    let simpleNFT, m4mNFT, components, registry, versionManager, dao;
     let owner;
     let operatorSigningKey;
     let simpleNFTId = 0;
@@ -17,10 +17,11 @@ describe("Test Zip", function () {
         m4mNFT = deployments.m4mNFT;
         components = deployments.m4mComponent;
         registry = deployments.m4mNFTRegistry;
+        dao = deployments.m4mDao;
         [owner] = await ethers.getSigners();
         operatorSigningKey = new ethers.utils.SigningKey('0x' + env.PRIVATE_KEY_2);
         await registry.setOperator(ethers.utils.computeAddress(operatorSigningKey.publicKey));
-        await deployments.m4mDao.setConvertibleList(simpleNFT.address, true);
+        await dao.setConvertibleList(simpleNFT.address, true);
         let hash = ethers.utils.solidityKeccak256(['bytes'],
             [ethers.utils.solidityPack(['address', 'uint'], [simpleNFT.address, simpleNFTId])]);
         m4mNFTId = ethers.BigNumber.from(hash);
@@ -135,5 +136,40 @@ describe("Test Zip", function () {
             tokenId: m4mNFTId,
             nft: m4mNFT.address,
         }, zip.address)).to.eq(oldVersion);
+    });
+    it('Test ZipV2 Mint', async function () {
+        // deploy SimpleM4mNFTV2
+        const SimpleM4mNFTV2 = await ethers.getContractFactory('SimpleM4mNFTV2');
+        const simpleNFTV2 = await SimpleM4mNFTV2.deploy('Simple Meta-4d.me NFT V2', 'sM4MV2');
+        // set convertable
+        await dao.setConvertibleList(simpleNFTV2.address, true)
+        // deploy Zip V2
+        const ZipV2 = await ethers.getContractFactory('ZipV2');
+        zip = await ZipV2.deploy('QmUbe9cwdyQDbcFjUTWW8untZwoQ2S6vy22ESKTW3MAdHs', simpleNFT.address, registry.address,
+            versionManager.address, simpleNFTV2.address);
+        // calculate new m4m nft id
+        let hash = ethers.utils.solidityKeccak256(['bytes'],
+            [ethers.utils.solidityPack(['address', 'uint'], [simpleNFTV2.address, simpleNFTId])]);
+        m4mNFTId = ethers.BigNumber.from(hash);
+
+        let componentIds = [19, 20, 21];
+        let amounts = [1, 1, 1];
+        hash = ethers.utils.solidityKeccak256(['bytes'],
+            [ethers.utils.solidityPack(['uint', 'uint[3]', 'uint[3]'], [m4mNFTId, componentIds, amounts])]);
+        let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
+        await zip.mintM4mNFTV2(owner.address, simpleNFTId, componentIds, amounts, sig);
+
+        expect(await m4mNFT.ownerOf(m4mNFTId)).to.eq(owner.address);
+        expect(await simpleNFT.ownerOf(simpleNFTId)).to.eq(registry.address);
+        for (const id of componentIds) {
+            expect(await components.totalSupply(id)).to.eq(1);
+            expect(await components.balanceOf(registry.address, id)).to.eq(1);
+            expect(await registry.getTokenComponentAmount(m4mNFTId, id)).to.eq(1);
+        }
+        const tokenStatus = await registry.getTokenStatus(m4mNFTId);
+        expect(tokenStatus[0]).to.eq(1);
+        expect(tokenStatus[1]).to.eq(hash);
+        expect(tokenStatus[2]).to.eq(simpleNFTV2.address);
+        expect(tokenStatus[3]).to.eq(simpleNFTId);
     });
 });

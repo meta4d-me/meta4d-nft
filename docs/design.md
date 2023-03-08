@@ -1,5 +1,17 @@
 # Meta4d.me Contract Design Docs
 
+## Definition
+
+### Account
+
+A user address is regarded as a user account.
+
+### Game Role
+
+One account can own unlimited number of game roles. The role is `M4M NFT` on chain.
+
+
+
 ## M4MDao
 
 - set convertable list

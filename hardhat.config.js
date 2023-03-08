@@ -49,7 +49,7 @@ module.exports = {
             accounts: [`0x${PRIV_1}`, `0x${PRIV_2}`, `0x${PRIV_3}`]
         },
         mumbai: {
-            url: 'https://rpc.ankr.com/polygon_mumbai',
+            url: `https://polygon-mumbai.g.alchemy.com/v2/${env.ALCHEMY}`,
             accounts: [`0x${PRIV_1}`, `0x${PRIV_2}`, `0x${PRIV_3}`]
         }
     }
