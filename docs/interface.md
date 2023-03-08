@@ -108,6 +108,15 @@ function mintM4mNFT(address owner, uint[]memory componentIds, uint[]memory amoun
 
 zip mint simple m4m nft and convert simple to M4M nft at one transaction.
 
+### mint M4M-NFT V2
+
+```solidity
+function mintM4mNFTV2(address owner, uint originalTokenId, uint[]memory componentIds, uint[]memory amounts, bytes memory sig) external;
+```
+
+zip mint simple m4m nft v2 and convert simple to M4M nft at one transaction, user should specify the tokenId of simple
+m4m nft v2.
+
 #### Usage
 
 ```js
@@ -164,9 +173,8 @@ let outAmounts = [1, 1, 1];
 let inComponentIds = [11, 12, 13];
 let inAmounts = [1, 1, 1];
 let oldVersion = "ipfs://oldoldoldoldold"
-await zip.changeComponentsAndRecordVersion(m4mNFTId, outComponentIds, outAmounts, inComponentIds, inAmounts,oldVersion);
+await zip.changeComponentsAndRecordVersion(m4mNFTId, outComponentIds, outAmounts, inComponentIds, inAmounts, oldVersion);
 ```
-
 
 ## Baggage
 
@@ -183,7 +191,6 @@ function gameBegin(uint gameId, string memory uuid, uint m4mTokenId, uint[] memo
 - m4mTokenId: token id of M4M-NFT
 - inComponents: used components, transfer into baggage and locked into M4M-NFT
 - inAmounts: the amounts of corresponding inComponents;
-
 
 ### game end
 
