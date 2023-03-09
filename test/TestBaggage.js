@@ -86,6 +86,8 @@ describe("Test Baggage", function () {
         let lostAmounts = [1, 1, 1, 1];
         let info = await m4mBaggage.lockedNFTs(m4mNFTId);
         expect(info.gameId).to.eq(gameId);
+        expect(info.owner).to.eq(owner.address);
+        expect(info.uuid).to.eq(uuid);
         let hash = ethers.utils.solidityKeccak256(['bytes'],
             [ethers.utils.solidityPack(['address', 'uint', 'uint', 'string', 'uint[1]', 'uint[1]', 'uint[4]', 'uint[4]'],
                 [info.owner, m4mNFTId, info.gameId, info.uuid, lootIds, lootAmounts, lostIds, lostAmounts])]);
