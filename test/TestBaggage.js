@@ -85,6 +85,7 @@ describe("Test Baggage", function () {
         let lostIds = [0, 1, 2, 3];
         let lostAmounts = [1, 1, 1, 1];
         let info = await m4mBaggage.lockedNFTs(m4mNFTId);
+        expect(info.gameId).to.eq(gameId);
         let hash = ethers.utils.solidityKeccak256(['bytes'],
             [ethers.utils.solidityPack(['address', 'uint', 'uint', 'string', 'uint[1]', 'uint[1]', 'uint[4]', 'uint[4]'],
                 [info.owner, m4mNFTId, info.gameId, info.uuid, lootIds, lootAmounts, lostIds, lostAmounts])]);
@@ -119,9 +120,96 @@ describe("Test Baggage", function () {
         expect(await components.balanceOf(m4mBaggage.address, componentId)).to.eq(0);
         expect(await components.balanceOf(registry.address, componentId)).to.eq(0);
         // game is settled
-        expect(await m4mBaggage.isGameSettled(owner.address, m4mNFTId, gameId, info.uuid));
+        expect(await m4mBaggage.isGameSettled(owner.address, m4mNFTId, gameId, info.uuid)).to.eq(true);
     });
-    it('could set operator and signer only once', async function(){
+    it('could set operator and signer only once', async function () {
         await expect(m4mBaggage.setGameSignerAndOperator(gameId, gameSignerAddr, gameOperatorAddr)).to.revertedWith('only once');
+    })
+    it('could lock components without M4M NFT', async function () {
+        m4mNFTId = 123123;
+        // mint some component for test
+        await components.prepareNewToken(5, 'M4m White COMPLEXION 3', 'WHITE-COMPLEXION-3');
+        await components.prepareNewToken(6, 'M4m White COMPLEXION 4', 'WHITE-COMPLEXION-4');
+        let inIds = [5];
+        let inAmounts = [2];
+        let uuid = '1231231321323';
+        let hash = ethers.utils.solidityKeccak256(['bytes'],
+            [ethers.utils.solidityPack(['address', 'string', 'uint[1]', 'uint[1]'],
+                [owner.address, uuid, inIds, inAmounts])]);
+        let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
+        await registry.claimLoot(uuid, inIds, inAmounts, sig);
+
+        const M4mBaggageWithoutRole = await ethers.getContractFactory('M4mBaggageWithoutRole');
+        m4mBaggage = await upgrades.upgradeProxy(m4mBaggage.address, M4mBaggageWithoutRole);
+        await m4mBaggage.lockComponents(m4mNFTId, gameId, inIds, inAmounts);
+        for (const componentId of inIds) {
+            expect(await components.totalSupply(componentId)).to.eq(2);
+            expect(await components.balanceOf(owner.address, componentId)).to.eq(0);
+            expect(await components.balanceOf(m4mBaggage.address, componentId)).to.eq(2);
+            expect(await components.balanceOf(registry.address, componentId)).to.eq(0);
+        }
+    });
+    it('could settle partially', async function () {
+        let lootIds = [6];
+        let lootAmounts = [1];
+        let lostIds = [5];
+        let lostAmounts = [1];
+        let nonce = 1;
+
+        let hash = ethers.utils.solidityKeccak256(['bytes'],
+            [ethers.utils.solidityPack(['uint', 'uint', 'uint', 'uint[1]', 'uint[1]', 'uint[1]', 'uint[1]'],
+                [m4mNFTId, gameId, nonce, lootIds, lootAmounts, lostIds, lostAmounts])]);
+        let operatorSig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
+        let gameSignerSig = ethers.utils.joinSignature(await gameSigningKey.signDigest(hash));
+        let emptySig = Buffer.from('');
+        // should revert without sig
+        await expect(m4mBaggage.settleLoots(m4mNFTId, nonce, lootIds, lootAmounts, lostIds, lostAmounts, emptySig, emptySig))
+            .to.revertedWith('no permission');
+        let snapshot = await ethers.provider.send("evm_snapshot");
+        await m4mBaggage.settleLoots(m4mNFTId, nonce, lootIds, lootAmounts, lostIds, lostAmounts, emptySig, gameSignerSig);
+        await ethers.provider.send("evm_revert", [snapshot]);
+        snapshot = await ethers.provider.send("evm_snapshot");
+        await m4mBaggage.settleLoots(m4mNFTId, nonce, lootIds, lootAmounts, lostIds, lostAmounts, operatorSig, emptySig);
+        await ethers.provider.send("evm_revert", [snapshot]);
+        let [, otherAcc,] = await ethers.getSigners();
+        await m4mBaggage.connect(otherAcc).settleLoots(m4mNFTId, nonce, lootIds, lootAmounts, lostIds, lostAmounts,
+            operatorSig, gameSignerSig);
+
+        let componentId = lostIds[0];
+        expect(await components.totalSupply(componentId)).to.eq(1); // lost 1
+        expect(await components.balanceOf(owner.address, componentId)).to.eq(0);
+        expect(await components.balanceOf(m4mBaggage.address, componentId)).to.eq(1);
+        expect(await components.balanceOf(registry.address, componentId)).to.eq(0);
+        componentId = lootIds[0];
+        expect(await components.totalSupply(componentId)).to.eq(1); // own loots
+        expect(await components.balanceOf(owner.address, componentId)).to.eq(1);
+        expect(await components.balanceOf(m4mBaggage.address, componentId)).to.eq(0);
+        expect(await components.balanceOf(registry.address, componentId)).to.eq(0);
+    });
+    it('could unlock components', async function () {
+        let outIds = [5];
+        let hash = ethers.utils.solidityKeccak256(['bytes'],
+            [ethers.utils.solidityPack(['uint', 'uint', 'uint[1]'],
+                [m4mNFTId, gameId, outIds])]);
+        let operatorSig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
+        let gameSignerSig = ethers.utils.joinSignature(await gameSigningKey.signDigest(hash));
+        let emptySig = Buffer.from('');
+        // should revert without sig
+        await expect(m4mBaggage.unlockComponents(m4mNFTId, outIds, emptySig, emptySig))
+            .to.revertedWith('no permission');
+        let snapshot = await ethers.provider.send("evm_snapshot");
+        await m4mBaggage.unlockComponents(m4mNFTId, outIds, emptySig, gameSignerSig);
+        await ethers.provider.send("evm_revert", [snapshot]);
+        snapshot = await ethers.provider.send("evm_snapshot");
+        await m4mBaggage.unlockComponents(m4mNFTId, outIds, operatorSig, emptySig);
+        await ethers.provider.send("evm_revert", [snapshot]);
+        let [, otherAcc,] = await ethers.getSigners();
+        await m4mBaggage.connect(otherAcc).unlockComponents(m4mNFTId, outIds,
+            operatorSig, gameSignerSig);
+        let componentId = outIds[0];
+        expect(await components.totalSupply(componentId)).to.eq(1); // lost 1
+        expect(await components.balanceOf(owner.address, componentId)).to.eq(1);
+        expect(await components.balanceOf(m4mBaggage.address, componentId)).to.eq(0);
+        expect(await components.balanceOf(registry.address, componentId)).to.eq(0);
     })
 });

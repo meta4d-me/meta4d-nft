@@ -62,10 +62,13 @@ disassembled component can be transferred separately.
 ### Baggage
 
 Baggage is not a backpack in the game concept, but an auxiliary contract, which is used to assist users to enter the
-game and lock the role image (put on, take off some specified components, and then lock).
+game and lock the role (put on, take off some specified components, and then lock).
 
 At the same time, Baggage also manages the signer and operator of each game as the management contract of game signature
 authority.
+
+Baggage supports both NFT-owned and NFT-empty roles. Note that these two roles cannot be mixed when locking and
+unlocking.
 
 ## Contracts
 
@@ -125,3 +128,7 @@ SimpleM4mNFT is temporarily used as the user's original NFT, which can be mint b
         - The user acknowledges this result by sending a transaction, and the singer/operator's sign this result. If
           the user refuses to accept the game result, anyone could send a transaction after obtaining the signature of
           the signer and operator to settle the game
+
+> note: lock and settle is 1-1 corresponding. If the lock is a Role with M4M-NFT, it can only be settled once, and then
+> the NFT will be unlocked. If the lock is a Role without M4M-NFT, it can be settled multiple times, and should unlock
+> manually.

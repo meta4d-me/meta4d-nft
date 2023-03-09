@@ -30,6 +30,8 @@ interface IM4mBaggage {
 
     function getGameOwner(uint gameId) external view returns (address signer, address operator);
 
+    function lockedNFTs(uint m4mTokenId) external view returns (address owner, uint gameId, string memory uuid);
+
     /// @notice enter game, transfer M4M-NFT and some components to self, assemble components to M4M-NFT and then lock it
     /// @notice one m4m nft could only play one game at the same time
     function gameBegin(uint gameId, string memory uuid, uint m4mTokenId, uint[] memory inComponentIds, uint[] memory inAmounts) external;

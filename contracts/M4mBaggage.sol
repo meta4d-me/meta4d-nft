@@ -79,20 +79,16 @@ contract M4mBaggage is IM4mBaggage, OwnableUpgradeable, ERC721HolderUpgradeable,
         bytes memory operatorSig, bytes memory gameSignerSig
     ) public override {
         LockedNFT memory lockedInfo = lockedNFTs[m4mTokenId];
-        bytes32 hash = keccak256(abi.encodePacked(lockedInfo.owner, m4mTokenId, lockedInfo.gameId, lockedInfo.uuid,
-            lootIds, lootAmounts, lostIds, lostAmounts));
+        bytes memory settleInfo = abi.encodePacked(lockedInfo.owner, m4mTokenId, lockedInfo.gameId, lockedInfo.uuid);
+        bytes32 hash = keccak256(settleInfo);
         require(!_isGameSettled[hash], 'ended');
         _isGameSettled[hash] = true;
         delete lockedNFTs[m4mTokenId];
 
+        settleInfo = abi.encodePacked(settleInfo, lootIds, lootAmounts, lostIds, lostAmounts);
+        hash = keccak256(settleInfo);
         uint votes = msg.sender == lockedInfo.owner ? 1 : 0;
-        GameOwner memory signerAndOperator = getGameOwner[lockedInfo.gameId];
-        if (SignatureCheckerUpgradeable.isValidSignatureNow(signerAndOperator.signer, hash, gameSignerSig)) {
-            votes++;
-        }
-        if (SignatureCheckerUpgradeable.isValidSignatureNow(signerAndOperator.operator, hash, operatorSig)) {
-            votes++;
-        }
+        votes += checkSig(lockedInfo.gameId, hash, operatorSig, gameSignerSig);
         require(votes >= 2, 'no permission');
 
         // mint loot to user
@@ -108,8 +104,20 @@ contract M4mBaggage is IM4mBaggage, OwnableUpgradeable, ERC721HolderUpgradeable,
         emit GameSettled(m4mTokenId, lockedInfo);
     }
 
+    function checkSig(uint gameId, bytes32 hash, bytes memory operatorSig, bytes memory gameSignerSig) internal view returns (uint){
+        GameOwner memory signerAndOperator = getGameOwner[gameId];
+        uint votes = 0;
+        if (SignatureCheckerUpgradeable.isValidSignatureNow(signerAndOperator.signer, hash, gameSignerSig)) {
+            votes++;
+        }
+        if (SignatureCheckerUpgradeable.isValidSignatureNow(signerAndOperator.operator, hash, operatorSig)) {
+            votes++;
+        }
+        return votes;
+    }
+
     function isGameSettled(address owner, uint m4mTokenId, uint gameId, string memory uuid) public override view returns (bool){
-        bytes32 hash = keccak256(abi.encodePacked(owner, m4mTokenId, gameId, keccak256(bytes(uuid))));
+        bytes32 hash = keccak256(abi.encodePacked(owner, m4mTokenId, gameId, uuid));
         return _isGameSettled[hash];
     }
 }
