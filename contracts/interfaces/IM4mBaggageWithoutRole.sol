@@ -10,7 +10,7 @@ interface IM4mBaggageWithoutRole {
 
     function lockComponents(uint m4mTokenId, uint gameId, uint[] memory inComponentIds, uint[] memory inAmounts) external;
 
-    function unlockComponents(uint m4mTokenId, uint[] memory outComponentIds, bytes memory operatorSig, bytes memory gameSignerSig) external;
+    function unlockComponents(uint m4mTokenId, uint nonce, uint[] memory outComponentIds, bytes memory operatorSig, bytes memory gameSignerSig) external;
 
     function settleLoots(uint m4mTokenId, uint nonce,
         uint[] memory lootIds, uint[] memory lootAmounts,

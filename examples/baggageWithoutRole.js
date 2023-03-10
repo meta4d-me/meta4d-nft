@@ -30,7 +30,8 @@ console.log("settle loots, %s", tx.hash)
 
 /* unlock components after game over */
 let outIds = [5];
-signerSig = await sigServer.signUnlockComponents(m4mTokenId, outIds);
+nonce = 2;
+signerSig = await sigServer.signUnlockComponents(m4mTokenId, nonce, outIds);
 sig = Buffer.from(signerSig.substring(2), 'hex');
-tx = await baggage.unlockComponents(m4mTokenId, outIds, sig, Buffer.from(''));
+tx = await baggage.unlockComponents(m4mTokenId, nonce, outIds, sig, Buffer.from(''));
 console.log("unlock components after game over, %s", tx.hash)

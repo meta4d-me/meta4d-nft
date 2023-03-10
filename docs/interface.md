@@ -227,7 +227,7 @@ function lockComponents(uint m4mTokenId, uint gameId, uint[] memory inComponentI
 ### unlockComponents
 
 ```solidity
-function unlockComponents(uint m4mTokenId, uint[] memory outComponentIds, bytes memory operatorSig, bytes memory gameSignerSig);
+function unlockComponents(uint m4mTokenId, uint nonce, uint[] memory outComponentIds, bytes memory operatorSig, bytes memory gameSignerSig);
 ```
 
 - unlock user's all components of `outComponentIds`

@@ -34,6 +34,7 @@ contract M4mBaggage is IM4mBaggage, OwnableUpgradeable, ERC721HolderUpgradeable,
     }
 
     function setGameSignerAndOperator(uint gameId, address gameSigner, address operator) public onlyOwner {
+        require(gameId > 0, "ill gameId");
         require(getGameOwner[gameId].operator == address(0), 'only once');
         require(operator != address(0) && gameSigner != address(0), 'ill op/signer');
         getGameOwner[gameId] = GameOwner(gameSigner, operator);
