@@ -7,6 +7,7 @@ import '@openzeppelin/contracts-upgradeable/token/ERC1155/utils/ERC1155HolderUpg
 import '@openzeppelin/contracts-upgradeable/utils/cryptography/SignatureCheckerUpgradeable.sol';
 
 import "./interfaces/IM4mBaggageWithoutRole.sol";
+import "./interfaces/IM4mComponentsV2.sol";
 import "./M4mBaggage.sol";
 
 /// @notice store gaming prop, manage game operator
@@ -28,13 +29,13 @@ contract M4mBaggageWithoutRole is M4mBaggage, IM4mBaggageWithoutRole {
         require(lockedNFTs[m4mTokenId].owner == address(0), "duplicated M4mNFT");
         // check owner
         address existedOwner = lockedEmptyNFTs[m4mTokenId].owner;
-        if (existedOwner == address(0)) { // lock firstly
+        if (existedOwner == address(0)) {// lock firstly
             lockedEmptyNFTs[m4mTokenId].owner = msg.sender;
         } else {
             // cannot change owner, means that, disable role exchange
             require(existedOwner == msg.sender, 'owner required');
             // check gameId, if not 0, the role has been locked
-            require(lockedEmptyNFTs[m4mTokenId].gameId==0,'cannot lock again');
+            require(lockedEmptyNFTs[m4mTokenId].gameId == 0, 'cannot lock again');
         }
         // update gameId only, don't update nonce
         lockedEmptyNFTs[m4mTokenId].gameId = gameId;
@@ -47,10 +48,9 @@ contract M4mBaggageWithoutRole is M4mBaggage, IM4mBaggageWithoutRole {
     }
 
     function unlockComponents(uint m4mTokenId, uint nonce, uint[] memory outComponentIds, bytes memory operatorSig, bytes memory gameSignerSig) public {
-        LockedEmptyNFT memory lockedInfo = lockedEmptyNFTs[m4mTokenId];
-        require(lockedInfo.usedNonce == nonce - 1, 'ill nonce');
-        // update states
-        lockedEmptyNFTs[m4mTokenId].usedNonce = nonce;
+
+        LockedEmptyNFT memory lockedInfo = useNonce(m4mTokenId, nonce);
+
         // reset game id
         lockedEmptyNFTs[m4mTokenId].gameId = 0;
 
@@ -73,9 +73,7 @@ contract M4mBaggageWithoutRole is M4mBaggage, IM4mBaggageWithoutRole {
         uint[] memory lostIds, uint[] memory lostAmounts,
         bytes memory operatorSig, bytes memory gameSignerSig) public {
 
-        LockedEmptyNFT memory lockedInfo = lockedEmptyNFTs[m4mTokenId];
-        require(lockedInfo.usedNonce == nonce - 1, 'ill nonce');
-        lockedEmptyNFTs[m4mTokenId].usedNonce = nonce;
+        LockedEmptyNFT memory lockedInfo = useNonce(m4mTokenId, nonce);
 
         bytes32 hash = keccak256(abi.encodePacked(m4mTokenId, lockedInfo.gameId, nonce, lootIds, lootAmounts, lostIds, lostAmounts));
         uint votes = msg.sender == lockedInfo.owner ? 1 : 0;
@@ -89,5 +87,31 @@ contract M4mBaggageWithoutRole is M4mBaggage, IM4mBaggageWithoutRole {
             lockedComponents[m4mTokenId][lostIds[i]] -= lostAmounts[i];
         }
         registry.components().burnBatch(address(this), lostIds, lostAmounts);
+    }
+
+    function settleNewLoots(uint m4mTokenId, uint nonce, IM4mComponentsV2.PrepareAndMintParam[] memory params,
+        bytes memory operatorSig, bytes memory gameSignerSig) public override {
+
+        LockedEmptyNFT memory lockedInfo = useNonce(m4mTokenId, nonce);
+
+        // construct hash
+        bytes32[] memory paramsHashes = new bytes32[](params.length);
+        for (uint i = 0; i < params.length; i++) {
+            IM4mComponentsV2.PrepareAndMintParam memory param = params[i];
+            paramsHashes[i] = keccak256(abi.encodePacked(param.tokenId, param.prepare, param.name, param.symbol, param.amount));
+        }
+        bytes32 hash = keccak256(abi.encodePacked(m4mTokenId, lockedInfo.gameId, nonce, paramsHashes));
+        uint votes = msg.sender == lockedInfo.owner ? 1 : 0;
+        votes += checkSig(lockedInfo.gameId, hash, operatorSig, gameSignerSig);
+        require(votes >= 2, 'no permission');
+
+        registry.components().prepareAndMint(lockedInfo.owner, params);
+    }
+
+    function useNonce(uint m4mTokenId, uint nonce) internal returns (LockedEmptyNFT memory lockedInfo){
+        lockedInfo = lockedEmptyNFTs[m4mTokenId];
+        require(lockedInfo.usedNonce == nonce - 1, 'ill nonce');
+        require(lockedInfo.gameId != 0, 'unlocked');
+        lockedEmptyNFTs[m4mTokenId].usedNonce = nonce;
     }
 }

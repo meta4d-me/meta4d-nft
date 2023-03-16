@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+import "./IM4mComponentsV2.sol";
+
 interface IM4mBaggageWithoutRole {
     struct LockedEmptyNFT {
         address owner;
@@ -15,6 +17,9 @@ interface IM4mBaggageWithoutRole {
     function settleLoots(uint m4mTokenId, uint nonce,
         uint[] memory lootIds, uint[] memory lootAmounts,
         uint[] memory lostIds, uint[] memory lostAmounts,
+        bytes memory operatorSig, bytes memory gameSignerSig) external;
+
+    function settleNewLoots(uint m4mTokenId, uint nonce, IM4mComponentsV2.PrepareAndMintParam[] memory params,
         bytes memory operatorSig, bytes memory gameSignerSig) external;
 
     function lockedComponents(uint m4mTokenId, uint componentId) external view returns (uint);

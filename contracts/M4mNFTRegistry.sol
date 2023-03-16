@@ -17,7 +17,7 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
     /// @notice Meta-4D.me NFT
     IM4mNFT public override m4mNFT;
 
-    IM4mComponents public components;
+    IM4mComponentsV2 public components;
 
     address public operator;
 
@@ -43,7 +43,7 @@ contract M4mNFTRegistry is OwnableUpgradeable, ERC721HolderUpgradeable, ERC1155H
     event Assemble(uint m4mTokenId, uint[] componentIds, uint[] amount);
     event Redeem(address owner, IERC721 original, uint originalTokenId, uint m4mTokenId);
 
-    function initialize(IM4mComponents _components, IM4mNFT _m4mNFT, IM4mDAO _dao) public initializer {
+    function initialize(IM4mComponentsV2 _components, IM4mNFT _m4mNFT, IM4mDAO _dao) public initializer {
         __Ownable_init_unchained();
         __ERC721Holder_init_unchained();
         __ERC1155Holder_init_unchained();

@@ -2,7 +2,7 @@
 pragma solidity =0.8.12;
 
 import './IM4mNFT.sol';
-import './IM4mComponents.sol';
+import './IM4mComponentsV2.sol';
 
 interface IM4mNFTRegistry {
 
@@ -10,7 +10,7 @@ interface IM4mNFTRegistry {
 
     function m4mNFT() external view returns (IM4mNFT);
 
-    function components() external view returns (IM4mComponents);
+    function components() external view returns (IM4mComponentsV2);
 
     function operator() external view returns (address);
 

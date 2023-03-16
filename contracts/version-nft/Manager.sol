@@ -7,9 +7,9 @@ contract Manager is IManager {
 
     mapping(bytes32 => mapping(address => string)) public info;
 
-    mapping(bytes32 => address[]) private creators;
+    mapping(bytes32 => address[]) internal creators;
 
-    function encode(Token memory token) private pure returns (bytes32){
+    function encode(Token memory token) internal pure returns (bytes32){
         return keccak256(abi.encodePacked(token.chainId, token.nft, token.tokenId));
     }
 

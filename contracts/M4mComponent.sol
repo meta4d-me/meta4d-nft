@@ -39,6 +39,10 @@ contract M4mComponent is ERC1155Upgradeable, OwnableUpgradeable, IM4mComponents 
     function prepareNewToken(uint tokenId, string memory _name, string memory _symbol)
     public {
         require(msg.sender == owner() || msg.sender == operator, 'ill caller');
+        _prepareNewToken(tokenId, _name, _symbol);
+    }
+
+    function _prepareNewToken(uint tokenId, string memory _name, string memory _symbol) internal {
         require(totalSupply[tokenId] == 0, 'existed');
         name[tokenId] = _name;
         symbol[tokenId] = _symbol;

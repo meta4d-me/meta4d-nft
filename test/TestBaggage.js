@@ -198,9 +198,71 @@ describe("Test Baggage", function () {
         expect(lockedInfo.usedNonce).to.eq(nonce);
         expect(lockedInfo.gameId).to.eq(gameId);
     });
+    it('test prepare and mint', async () => {
+        // upgrade components
+        const M4mComponentV2 = await ethers.getContractFactory('M4mComponentV2');
+        components = await upgrades.upgradeProxy(components.address, M4mComponentV2, {
+            call: {
+                fn: 'initializeV2',
+                args: [m4mBaggage.address]
+            }
+        })
+        let params = [];
+        params.push({
+            tokenId: 20,
+            prepare: true,
+            name: 'test 1',
+            symbol: 'test symbol 1',
+            amount: 1
+        });
+        params.push({
+            tokenId: 21,
+            prepare: true,
+            name: 'test 2',
+            symbol: 'test symbol 2',
+            amount: 1
+        });
+        let paramsHashes = [];
+        for (const param of params) {
+            paramsHashes.push(ethers.utils.solidityKeccak256(['bytes'],
+                [ethers.utils.solidityPack(['uint', 'bool', 'string', 'string', 'uint'],
+                    [param.tokenId, param.prepare, param.name, param.symbol, param.amount])]));
+        }
+        let nonce = 2;
+        let hash = ethers.utils.solidityKeccak256(['bytes'],
+            [ethers.utils.solidityPack(['uint', 'uint', 'uint', `bytes32[${params.length}]`],
+                [m4mNFTId, gameId, nonce, paramsHashes])]);
+        let operatorSig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
+        let gameSignerSig = ethers.utils.joinSignature(await gameSigningKey.signDigest(hash));
+        let emptySig = Buffer.from('');
+        // should revert without sig
+        await expect(m4mBaggage.settleNewLoots(m4mNFTId, nonce, params, emptySig, emptySig))
+            .to.revertedWith('no permission');
+        let snapshot = await ethers.provider.send("evm_snapshot");
+        await m4mBaggage.settleNewLoots(m4mNFTId, nonce, params, emptySig, gameSignerSig);
+        await ethers.provider.send("evm_revert", [snapshot]);
+        snapshot = await ethers.provider.send("evm_snapshot");
+        await m4mBaggage.settleNewLoots(m4mNFTId, nonce, params, operatorSig, emptySig);
+        await ethers.provider.send("evm_revert", [snapshot]);
+        let [, otherAcc,] = await ethers.getSigners();
+        await m4mBaggage.connect(otherAcc).settleNewLoots(m4mNFTId, nonce, params, operatorSig, gameSignerSig);
+        let lockedInfo = await m4mBaggage.lockedEmptyNFTs(m4mNFTId);
+        expect(lockedInfo.owner).to.eq(owner.address);
+        expect(lockedInfo.usedNonce).to.eq(nonce);
+        expect(lockedInfo.gameId).to.eq(gameId);
+
+        for (const param of params) {
+            let componentId = param.tokenId;
+            expect(await components.totalSupply(componentId)).to.eq(param.amount);
+            expect(await components.balanceOf(m4mBaggage.address, componentId)).to.eq(0);
+            expect(await components.balanceOf(registry.address, componentId)).to.eq(0);
+            expect(await m4mBaggage.lockedComponents(m4mNFTId, componentId)).to.eq(0);
+            expect(await components.balanceOf(owner.address, componentId)).to.eq(param.amount);
+        }
+    })
     it('could unlock components', async function () {
         let outIds = [5];
-        let nonce = 2;
+        let nonce = 3;
         let hash = ethers.utils.solidityKeccak256(['bytes'],
             [ethers.utils.solidityPack(['uint', 'uint', 'uint', 'uint[1]'],
                 [m4mNFTId, nonce, gameId, outIds])]);
@@ -228,5 +290,5 @@ describe("Test Baggage", function () {
         expect(lockedInfo.owner).to.eq(owner.address);
         expect(lockedInfo.usedNonce).to.eq(nonce);
         expect(lockedInfo.gameId).to.eq(0);
-    })
+    });
 });
