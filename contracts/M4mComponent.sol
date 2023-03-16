@@ -81,7 +81,7 @@ contract M4mComponent is ERC1155Upgradeable, OwnableUpgradeable, IM4mComponents 
         _mintBatch(to, tokenIds, amounts, '');
     }
 
-    function checkInit(uint tokenId) private view {
+    function checkInit(uint tokenId) internal view {
         string memory _name = name[tokenId];
         require(bytes(_name).length > 0, 'no attr');
     }

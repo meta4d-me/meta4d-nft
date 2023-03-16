@@ -20,6 +20,8 @@ contract M4mComponentV2 is M4mComponent, IM4mComponentsV2 {
             PrepareAndMintParam memory param = params[i];
             if (param.prepare) {
                 _prepareNewToken(param.tokenId, param.name, param.symbol);
+            } else {
+                checkInit(param.tokenId);
             }
             totalSupply[param.tokenId] += param.amount;
             tokenIds[i] = param.tokenId;

@@ -207,6 +207,7 @@ describe("Test Baggage", function () {
                 args: [m4mBaggage.address]
             }
         })
+        await components.prepareNewToken(21, 'M4m White COMPLEXION 4', 'WHITE-COMPLEXION-4');
         let params = [];
         params.push({
             tokenId: 20,
@@ -217,9 +218,9 @@ describe("Test Baggage", function () {
         });
         params.push({
             tokenId: 21,
-            prepare: true,
-            name: 'test 2',
-            symbol: 'test symbol 2',
+            prepare: false,
+            name: '',
+            symbol: '',
             amount: 1
         });
         let paramsHashes = [];
