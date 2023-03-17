@@ -110,7 +110,7 @@ contract M4mBaggageWithoutRole is M4mBaggage, IM4mBaggageWithoutRole {
 
     function useNonce(uint m4mTokenId, uint nonce) internal returns (LockedEmptyNFT memory lockedInfo){
         lockedInfo = lockedEmptyNFTs[m4mTokenId];
-        require(lockedInfo.usedNonce < nonce, 'ill nonce');
+        require(lockedInfo.usedNonce == nonce - 1, 'ill nonce');
         require(lockedInfo.gameId != 0, 'unlocked');
         lockedEmptyNFTs[m4mTokenId].usedNonce = nonce;
     }
