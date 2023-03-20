@@ -25,7 +25,7 @@ contract M4mBaggageWithoutRole is M4mBaggage, IM4mBaggageWithoutRole {
 
 
     function lockComponents(uint m4mTokenId, uint gameId, uint[] memory inComponentIds, uint[] memory inAmounts) public {
-        require(inComponentIds.length == inAmounts.length && inComponentIds.length > 0, "ill param");
+        require(inComponentIds.length == inAmounts.length, "ill param");
         require(lockedNFTs[m4mTokenId].owner == address(0), "duplicated M4mNFT");
         // check owner
         address existedOwner = lockedEmptyNFTs[m4mTokenId].owner;
