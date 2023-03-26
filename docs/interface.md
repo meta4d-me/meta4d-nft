@@ -79,8 +79,18 @@ struct Token {
     function setInfo(Token memory token, string memory uri) external;
 ```
 
-Set uri for specified token. Note that one msg. sender can only set one version of URI. If it is set multiple times,
+Set uri for specified token. Note that one msg.sender can only set one version of URI. If it is set multiple times,
 only the latest URI will be retained
+
+## Set URI of specified version By Permit
+
+```solidity
+function setInfoByPermit(Token memory token, string memory uri, bytes memory sig) external;
+```
+
+The version creator is signer that generate `sig`.
+
+> [how to generate sig](../test/TestVersionNFT.js#L29-L41)
 
 ## Get URI of specified version
 

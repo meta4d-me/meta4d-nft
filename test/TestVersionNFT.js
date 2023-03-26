@@ -1,4 +1,5 @@
 const {expect} = require("chai");
+const env = require("../.env.json");
 
 describe("Test Version NFT", function () {
     let manager;
@@ -8,7 +9,7 @@ describe("Test Version NFT", function () {
         tokenId: 0,
     }
     it('deploy', async function () {
-        let Manager = await ethers.getContractFactory('Manager');
+        let Manager = await ethers.getContractFactory('ManagerV2');
         manager = await Manager.deploy();
     });
     it('test info', async function () {
@@ -24,5 +25,18 @@ describe("Test Version NFT", function () {
         expect(_uris.length).to.eq(2);
 
         await expect(manager.setInfo(token, '')).to.be.revertedWith('illegal uri');
+    });
+    it('test info by permit', async function () {
+        let uri = 'ipfs://ccc';
+        let tokenHash = ethers.utils.solidityKeccak256(['bytes'],
+            [ethers.utils.solidityPack(['uint', 'address', 'uint'], [token.chainId, token.nft, token.tokenId])]);
+        let hash = ethers.utils.solidityKeccak256(['bytes'],
+            [ethers.utils.solidityPack(['bytes32', 'string'], [tokenHash, uri])]);
+        let operatorSigningKey = new ethers.utils.SigningKey('0x' + env.PRIVATE_KEY_2);
+        let sig = ethers.utils.joinSignature(await operatorSigningKey.signDigest(hash));
+        await manager.setInfoByPermit(token, uri, sig);
+        let signerAddr = ethers.utils.computeAddress(operatorSigningKey.publicKey);
+        let info = await manager.getInfo(token, signerAddr);
+        expect(info).to.eq(uri);
     });
 });

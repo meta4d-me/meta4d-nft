@@ -15,3 +15,8 @@ interface IManager {
 
     function getLatestInfoAll(Token memory token) external view returns (address[] memory creators, string[] memory uris);
 }
+
+interface IManagerV2 is IManager {
+    /// creator is signer
+    function setInfoByPermit(Token memory token, string memory uri, bytes memory sig) external;
+}
