@@ -38,5 +38,22 @@ describe("Test Version NFT", function () {
         let signerAddr = ethers.utils.computeAddress(operatorSigningKey.publicKey);
         let info = await manager.getInfo(token, signerAddr);
         expect(info).to.eq(uri);
+
+        sig = '0xae3d9e146406042e2a6e2ae7298d48add0bfeb7bff6bfbbd20515d11244c646462beb6565a2ee912458be6ba2549c269fcf7fb90f7028eaf8b737b46999b49f71b';
+        let param = {
+            chain_id: 1,
+            nft: "0x1a8a1dfd9063eae42a2b8339966fbea388430ca4",
+            token_id: "10",
+            uri: "ipfs://asfdsadadasdasdadadadaddaa"
+        }
+        token = {
+            tokenId: param.token_id,
+            chainId: param.chain_id,
+            nft: param.nft
+        }
+        await manager.setInfoByPermit(token, param.uri, sig);
+        signerAddr = '0xfBAE37FbBCE95aa4a28B20A9e98048C7D8d9B7d1';
+        info = await manager.getInfo(token, signerAddr);
+        expect(info).to.eq(param.uri);
     });
 });
