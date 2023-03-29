@@ -143,7 +143,8 @@ describe("Test Baggage", function () {
 
         const M4mBaggageWithoutRole = await ethers.getContractFactory('M4mBaggageWithoutRole');
         m4mBaggage = await upgrades.upgradeProxy(m4mBaggage.address, M4mBaggageWithoutRole);
-        await m4mBaggage.lockComponents(m4mNFTId, gameId, inIds, inAmounts);
+        await m4mBaggage.lockComponents(m4mNFTId, gameId, inIds, [1]);
+        await m4mBaggage.appendLock(m4mNFTId, inIds, [1]);
         for (const componentId of inIds) {
             expect(await components.totalSupply(componentId)).to.eq(2);
             expect(await components.balanceOf(owner.address, componentId)).to.eq(0);

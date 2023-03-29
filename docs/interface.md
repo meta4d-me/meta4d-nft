@@ -234,6 +234,15 @@ function lockComponents(uint m4mTokenId, uint gameId, uint[] memory inComponentI
       originalTokenId))), refer [here](../test/TestBaggage.js#L29-L31). The originalNFT should be controlled by game
       owner.
 
+### appendLock
+
+```solidity
+function appendLock(uint m4mTokenId, uint[] memory inComponentIds, uint[] memory inAmounts) external;
+```
+
+- lock user's components to locked game
+- the role corresponding to `m4mTokenId` should be locked
+
 ### unlockComponents
 
 ```solidity

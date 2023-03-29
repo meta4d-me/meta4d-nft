@@ -47,6 +47,20 @@ contract M4mBaggageWithoutRole is M4mBaggage, IM4mBaggageWithoutRole {
         }
     }
 
+    function appendLock(uint m4mTokenId, uint[] memory inComponentIds, uint[] memory inAmounts) public {
+        require(inComponentIds.length == inAmounts.length, "ill param");
+        // check owner
+        address existedOwner = lockedEmptyNFTs[m4mTokenId].owner;
+        require(existedOwner == msg.sender, 'owner required');
+        // check locked
+        require(lockedEmptyNFTs[m4mTokenId].gameId > 0, 'unlocked');
+        // transfer components in
+        registry.components().safeBatchTransferFrom(msg.sender, address(this), inComponentIds, inAmounts, '');
+        for (uint i = 0; i < inComponentIds.length; i++) {
+            lockedComponents[m4mTokenId][inComponentIds[i]] += inAmounts[i];
+        }
+    }
+
     function unlockComponents(uint m4mTokenId, uint nonce, uint[] memory outComponentIds, bytes memory operatorSig, bytes memory gameSignerSig) public {
 
         LockedEmptyNFT memory lockedInfo = useNonce(m4mTokenId, nonce);
